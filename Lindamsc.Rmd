@@ -1,0 +1,21 @@
+---
+title: "SDG6reproducibility"
+output: html_document
+date: '2022-06-20'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+
+jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+```
+
+
