@@ -98,21 +98,7 @@
 
 <div class="quarto-title"><h1 class="title display-7">SDG6reproducibility</h1></div></header>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-stderr">
-<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
-</div>
-<div class="cell-output-stderr">
-<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
-✓ tibble  3.1.6     ✓ dplyr   1.0.8
-✓ tidyr   1.1.4     ✓ stringr 1.4.0
-✓ readr   2.0.0     ✓ forcats 0.5.1</code></pre>
-</div>
-<div class="cell-output-stderr">
-<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()</code></pre>
-</div>
+
 </div>
 <div class="cell">
 
@@ -120,7 +106,7 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 <section id="data-import" class="level1">
 <h1>Data import</h1>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>jmpraw <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/2020-09-30_jmp_sanitation_raw_data.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
 </div>
 </section>
 <section id="data-exploration" class="level1">
@@ -128,59 +114,44 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 <section id="data-exploration-1" class="level2">
 <h2 class="anchored" data-anchor-id="data-exploration-1">Data exploration</h2>
 <p>Text</p>
+</section>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<section id="jmp-methods-report" class="level2">
+<h2 class="anchored" data-anchor-id="jmp-methods-report">JMP Methods report</h2>
+<ul>
+<li></li>
+</ul>
+</section>
+</section>
+<section id="first-linear-model" class="level1">
+<h1>First linear model</h1>
+<ul>
+<li>Model for Uganda, rural, improved</li>
+<li>Data is not linear</li>
+</ul>
+<section id="observations" class="level2">
+<h2 class="anchored" data-anchor-id="observations">Observations</h2>
+<p>Learn more about modeling in R:</p>
+<ul>
+<li>R4DS chapter - https://r4ds.had.co.nz/model-intro.html</li>
+<li>Book: Statistical Inference via Data Science: A ModernDive into R and the Tidyverse! - https://moderndive.com/</li>
+<li>R Packages: Tidymodels - https://www.tidymodels.org/</li>
+</ul>
+<p>https://broom.tidymodels.org/articles/broom.html</p>
 <div class="cell">
-<div class="sourceCode" id="cb6"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(jmpraw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-stdout">
-<pre><code>Rows: 16,576
-Columns: 9
-$ source            &lt;chr&gt; "MICS03", "NRVA03", "NRVS05", "NRVA08", "MICS11", "N…
-$ type              &lt;chr&gt; "Survey", "Survey", "Survey", "Survey", "Survey", "S…
-$ year              &lt;dbl&gt; 2003, 2003, 2005, 2008, 2011, 2012, 2014, 2015, 2017…
-$ var_short         &lt;chr&gt; "s_imp_r", "s_imp_r", "s_imp_r", "s_imp_r", "s_imp_r…
-$ value             &lt;dbl&gt; 26.00000, 28.55865, 31.17534, 30.10000, 44.20000, 36…
-$ iso3              &lt;chr&gt; "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AFG", "AF…
-$ var_long          &lt;chr&gt; "Improved", "Improved", "Improved", "Improved", "Imp…
-$ residence         &lt;chr&gt; "rural", "rural", "rural", "rural", "rural", "rural"…
-$ san_service_chain &lt;fct&gt; user interface, user interface, user interface, user…</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode" id="cb8"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(jmpraw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-stdout">
-<pre><code># A tibble: 6 × 9
-  source type    year var_short value iso3  var_long residence san_service_chain
-  &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;fct&gt;            
-1 MICS03 Survey  2003 s_imp_r    26   AFG   Improved rural     user interface   
-2 NRVA03 Survey  2003 s_imp_r    28.6 AFG   Improved rural     user interface   
-3 NRVS05 Survey  2005 s_imp_r    31.2 AFG   Improved rural     user interface   
-4 NRVA08 Survey  2008 s_imp_r    30.1 AFG   Improved rural     user interface   
-5 MICS11 Survey  2011 s_imp_r    44.2 AFG   Improved rural     user interface   
-6 NRVA12 Survey  2012 s_imp_r    36.3 AFG   Improved rural     user interface   </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode" id="cb10"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(jmpraw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-stdout">
-<pre><code># A tibble: 6 × 9
-  source type   year var_short   value iso3  var_long residence san_service_cha…
-  &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;fct&gt;           
-1 WWT15  Admin  2015 s_treat_wt…  47.7 ZWE   Treated… national  WW treatment    
-2 &lt;NA&gt;   &lt;NA&gt;     NA &lt;NA&gt;         NA   MAC   &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;            
-3 &lt;NA&gt;   &lt;NA&gt;     NA &lt;NA&gt;         NA   VAT   &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;            
-4 &lt;NA&gt;   &lt;NA&gt;     NA &lt;NA&gt;         NA   IMN   &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;            
-5 &lt;NA&gt;   &lt;NA&gt;     NA &lt;NA&gt;         NA   SPM   &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;            
-6 &lt;NA&gt;   &lt;NA&gt;     NA &lt;NA&gt;         NA   ESH   &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;            </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode" id="cb12"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>jmpraw <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(iso3 <span class="sc">==</span> <span class="st">"UGA"</span>,residence <span class="sc">==</span> <span class="st">"rural"</span>, var_long <span class="sc">==</span> <span class="st">"Improved"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lm</span>(value <span class="sc">~</span> year,.) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>uga_rural_improved <span class="ot">&lt;-</span> jmpraw <span class="sc">%&gt;%</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(iso3 <span class="sc">==</span> <span class="st">"UGA"</span>,residence <span class="sc">==</span> <span class="st">"rural"</span>, var_long <span class="sc">==</span> <span class="st">"Improved"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>uga_rural_improved_lm_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(value <span class="sc">~</span> year, <span class="at">data =</span> uga_rural_improved)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(uga_rural_improved_lm_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-stdout">
 <pre><code>
 Call:
-lm(formula = value ~ year, data = .)
+lm(formula = value ~ year, data = uga_rural_improved)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
@@ -197,15 +168,114 @@ Residual standard error: 3.395 on 20 degrees of freedom
 Multiple R-squared:  0.2255,    Adjusted R-squared:  0.1868 
 F-statistic: 5.823 on 1 and 20 DF,  p-value: 0.02553</code></pre>
 </div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(uga_rural_improved_lm_fit) <span class="sc">|&gt;</span>  </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">-638.88</td>
+<td style="text-align: right;">274.72</td>
+<td style="text-align: right;">-2.33</td>
+<td style="text-align: right;">0.03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">year</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">2.41</td>
+<td style="text-align: right;">0.03</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(uga_rural_improved_lm_fit) <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 6%">
+<col style="width: 10%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 12%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">r.squared</th>
+<th style="text-align: right;">adj.r.squared</th>
+<th style="text-align: right;">sigma</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+<th style="text-align: right;">df</th>
+<th style="text-align: right;">logLik</th>
+<th style="text-align: right;">AIC</th>
+<th style="text-align: right;">BIC</th>
+<th style="text-align: right;">deviance</th>
+<th style="text-align: right;">df.residual</th>
+<th style="text-align: right;">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">3.4</td>
+<td style="text-align: right;">5.82</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-57.06</td>
+<td style="text-align: right;">120.12</td>
+<td style="text-align: right;">123.4</td>
+<td style="text-align: right;">230.59</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">22</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>jmpraw <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(iso3 <span class="sc">==</span> <span class="st">"SEN"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(residence, var_short) <span class="sc">|&gt;</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean =</span> <span class="fu">mean</span>(value))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-stdout">
+<pre><code># A tibble: 26 × 3
+# Groups:   residence [3]
+   residence var_short      mean
+   &lt;chr&gt;     &lt;chr&gt;         &lt;dbl&gt;
+ 1 national  s_lat_nemp_r  79.8 
+ 2 national  s_lat_nemp_u  41.9 
+ 3 national  s_sep_nemp_r  35.2 
+ 4 national  s_sep_nemp_u  35.7 
+ 5 national  s_treat_wtp_n 34.8 
+ 6 rural     s_imp_r       39.6 
+ 7 rural     s_lat_edl_r   13.9 
+ 8 rural     s_lat_ero_r    6.27
+ 9 rural     s_lat_r       23.8 
+10 rural     s_od_r        30.1 
+# … with 16 more rows</code></pre>
+</div>
 </div>
 </section>
-</section>
-<section id="first-linear-model" class="level1">
-<h1>First linear model</h1>
-<ul>
-<li>Model for Uganda, rural, improved</li>
-<li>Data is not linear</li>
-</ul>
 <section id="reference-papers" class="level2">
 <h2 class="anchored" data-anchor-id="reference-papers">Reference papers</h2>
 <ul>
@@ -213,17 +283,11 @@ F-statistic: 5.823 on 1 and 20 DF,  p-value: 0.02553</code></pre>
 </ul>
 <p><strong>Gaps identified</strong></p>
 <div class="cell">
-<div class="sourceCode" id="cb14"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>jmpraw <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(iso3 <span class="sc">==</span> <span class="st">"UGA"</span>,residence <span class="sc">==</span> <span class="st">"rural"</span>, var_long <span class="sc">==</span> <span class="st">"Improved"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Lindamsc_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="sourceCode r cell-code code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>jmpraw <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(iso3 <span class="sc">==</span> <span class="st">"UGA"</span>,residence <span class="sc">==</span> <span class="st">"rural"</span>, var_long <span class="sc">==</span> <span class="st">"Improved"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-stdout">
 <pre><code># A tibble: 22 × 9
    source type    year var_short value iso3  var_long residence san_service_cha…

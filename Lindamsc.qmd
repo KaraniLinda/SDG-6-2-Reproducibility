@@ -2,13 +2,11 @@
 title: "SDG6reproducibility"
 format: html
 execute:
-    echo: false
+  echo: false
+  warning: false
+editor_options: 
+  chunk_output_type: console
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 
 ```{r}
 library(tidyverse)
@@ -30,35 +28,81 @@ jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 Text
 
 ```{r}
+#| include: false 
+
 glimpse(jmpraw)
 ```
 
 ```{r}
+#| include: false 
+
 head(jmpraw)
 ```
 
 ```{r}
+#| include: false 
+
 tail(jmpraw)
 ```
-```{r}
-jmpraw %>% 
-    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>% 
-    lm(value ~ year,.) %>% 
-    summary()
-```
+
+# Methods
+
+## JMP Methods report
+
+- 
+
 
 # First linear model
 
 - Model for Uganda, rural, improved
 - Data is not linear
 
+## Observations
+
+Learn more about modeling in R:
+
+-   R4DS chapter - https://r4ds.had.co.nz/model-intro.html
+-   Book: Statistical Inference via Data Science: A ModernDive into R and the Tidyverse! - https://moderndive.com/
+-   R Packages: Tidymodels - https://www.tidymodels.org/
+
+https://broom.tidymodels.org/articles/broom.html
+
+
+
+```{r}
+#| echo: true
+
+uga_rural_improved <- jmpraw %>% 
+    filter(iso3 == "UGA",residence == "rural", var_long == "Improved")
+
+
+uga_rural_improved_lm_fit <- lm(value ~ year, data = uga_rural_improved)
+
+summary(uga_rural_improved_lm_fit)
+    
+library(broom)
+
+tidy(uga_rural_improved_lm_fit) |>  
+    knitr::kable(digits = 2)
+
+glance(uga_rural_improved_lm_fit) |> 
+        knitr::kable(digits = 2)
+
+jmpraw |> 
+    #filter(iso3 == "SEN") |> 
+    group_by(iso3, var_short, residence) |> 
+    #mutate(mean = mean(value))
+    #summarise(mean(value))
+    summarise(mean = mean(value),
+              sd = sd(value))
+
+```
+
 ## Reference papers
 
 - LINK
 
 **Gaps identified**
-
-
 
 ```{r}
 jmpraw %>% 
