@@ -1,7 +1,8 @@
 ---
 title: "SDG6reproducibility"
-output: html_document
-date: '2022-06-20'
+format: html
+execute:
+    echo: false
 ---
 
 ```{r setup, include=FALSE}
@@ -16,10 +17,17 @@ library(tidyverse)
 ```{r}
 ```
 
+# Data import
 
 ```{r}
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 ```
+
+# Data exploration
+
+## Data exploration
+
+Text
 
 ```{r}
 glimpse(jmpraw)
@@ -38,6 +46,18 @@ jmpraw %>%
     lm(value ~ year,.) %>% 
     summary()
 ```
+
+# First linear model
+
+- Model for Uganda, rural, improved
+- Data is not linear
+
+## Reference papers
+
+- LINK
+
+**Gaps identified**
+
 
 
 ```{r}
