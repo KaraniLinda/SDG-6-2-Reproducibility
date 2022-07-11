@@ -14,8 +14,42 @@ library(tidyverse)
 ```
 
 ```{r}
-
-jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 ```
 
 
+```{r}
+jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+```
+
+```{r}
+glimpse(jmpraw)
+```
+
+```{r}
+head(jmpraw)
+```
+
+```{r}
+tail(jmpraw)
+```
+```{r}
+jmpraw %>% 
+    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>% 
+    lm(value ~ year,.) %>% 
+    summary()
+```
+
+
+```{r}
+jmpraw %>% 
+    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>% 
+    ggplot(aes(x = year, y = value)) +
+    geom_point() 
+
+```
+
+```{r}
+jmpraw %>% 
+    filter(iso3 == "UGA",residence == "rural", var_long == "Improved")
+```
+    
