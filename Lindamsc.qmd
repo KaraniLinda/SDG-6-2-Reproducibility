@@ -5,7 +5,7 @@ execute:
   echo: false
   warning: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r}
@@ -44,6 +44,14 @@ head(jmpraw)
 
 tail(jmpraw)
 ```
+```{r}
+jmpraw %>% 
+    count(var_short, var_long) %>% 
+    View()
+
+```
+
+
 
 # Methods
 
@@ -72,22 +80,6 @@ https://broom.tidymodels.org/articles/broom.html
 ```{r}
 #| echo: true
 
-uga_rural_improved <- jmpraw %>% 
-    filter(iso3 == "UGA",residence == "rural", var_long == "Improved")
-
-
-uga_rural_improved_lm_fit <- lm(value ~ year, data = uga_rural_improved)
-
-summary(uga_rural_improved_lm_fit)
-    
-library(broom)
-
-tidy(uga_rural_improved_lm_fit) |>  
-    knitr::kable(digits = 2)
-
-glance(uga_rural_improved_lm_fit) |> 
-        knitr::kable(digits = 2)
-
 jmpraw |> 
     #filter(iso3 == "SEN") |> 
     group_by(iso3, var_short, residence) |> 
@@ -112,8 +104,59 @@ jmpraw %>%
 
 ```
 
+
+
+#using the linear model to predict from 2000-2007
 ```{r}
-jmpraw %>% 
-    filter(iso3 == "UGA",residence == "rural", var_long == "Improved")
+uga_rural_improved_lm_fit$fitted.values
 ```
+
+```{r}
+tibble(year = seq(2000,2021,1), 
+       estimate = uga_predict)
+```
+
+```{r}
+uga_rural_improved <- jmpraw %>%  
+    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>%  
+    group_by(year) %>% 
+    summarise(mean_value = mean(value))
+
+uga_rural_improved
     
+
+
+    
+```
+```{r}
+
+uga_rural_improved_lm_fit <- lm(mean_value ~ year, data = uga_rural_improved)
+
+summary(uga_rural_improved_lm_fit)
+    
+library(broom)
+
+tidy(uga_rural_improved_lm_fit) |>  
+    knitr::kable(digits = 2)
+
+glance(uga_rural_improved_lm_fit) |> 
+        knitr::kable(digits = 2)
+
+```
+#using the linear model to predict from 2000-2007
+```{r}
+library(modelr)
+uga_predict <- predict(uga_rural_improved_lm_fit)
+ 
+uga_values <- tibble(year = seq(2000,2020,1)) %>%
+    add_predictions(model= uga_rural_improved_lm_fit)
+
+uga_values       
+```
+
+#Join input with predictions
+```{r}
+uga_values %>% 
+    left_join(uga_rural_improved)
+```
+
