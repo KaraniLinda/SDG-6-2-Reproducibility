@@ -151,7 +151,7 @@ uga_predict <- predict(uga_rural_improved_lm_fit)
 uga_values <- tibble(year = seq(2000,2020,1)) %>%
     add_predictions(model= uga_rural_improved_lm_fit)
 
-uga_values       
+uga_values         
 ```
 
 #Join input with predictions
