@@ -5,11 +5,12 @@ execute:
   echo: false
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
 library(tidyverse)
+library(modelr)
 ```
 
 ```{r}
@@ -46,8 +47,7 @@ tail(jmpraw)
 ```
 ```{r}
 jmpraw %>% 
-    count(var_short, var_long) %>% 
-    View()
+    count(var_short, var_long) 
 
 ```
 
@@ -107,27 +107,22 @@ jmpraw %>%
 
 
 #using the linear model to predict from 2000-2007
-```{r}
-uga_rural_improved_lm_fit$fitted.values
-```
+
+
+
 
 ```{r}
-tibble(year = seq(2000,2021,1), 
-       estimate = uga_predict)
-```
 
-```{r}
 uga_rural_improved <- jmpraw %>%  
     filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>%  
     group_by(year) %>% 
     summarise(mean_value = mean(value))
 
-uga_rural_improved
-    
 
 
     
 ```
+
 ```{r}
 
 uga_rural_improved_lm_fit <- lm(mean_value ~ year, data = uga_rural_improved)
@@ -145,11 +140,10 @@ glance(uga_rural_improved_lm_fit) |>
 ```
 #using the linear model to predict from 2000-2007
 ```{r}
-library(modelr)
-uga_predict <- predict(uga_rural_improved_lm_fit)
+
  
 uga_values <- tibble(year = seq(2000,2020,1)) %>%
-    add_predictions(model= uga_rural_improved_lm_fit)
+    add_predictions(model = uga_rural_improved_lm_fit)
 
 uga_values         
 ```
@@ -158,5 +152,73 @@ uga_values
 ```{r}
 uga_values %>% 
     left_join(uga_rural_improved)
+```
+
+# Model predictions all countries
+
+```{r}
+
+
+
+```
+## Example from StackOverflow
+
+```{r}
+
+# Support from: https://stackoverflow.com/a/63774042/6816220
+# 
+
+
+
+# Filter data for urbal, rural, improved and shared
+
+jmp_urban_rural_improved_shared <- jmpraw |> 
+    filter(residence != "national",
+           var_long %in% c("Improved", "Shared"))
+
+# summarise data by year
+
+jmp_all_mean_value <- jmp_urban_rural_improved_shared |> 
+    group_by(iso3, residence, var_long, year) |> 
+    summarise(mean_value = mean(value)) |> 
+    ungroup() 
+
+# create model fit for all countries, residence and variables 
+
+jmp_all_model_fit <- jmp_all_mean_value |> 
+    nest_by(iso3, residence, var_long) |> 
+    mutate(model_fit = list(lm(mean_value ~ year, data = data)))
+    
+# Create a tidy dataframe with model intercept and coefficients
+
+jmp_all_model_fit |> 
+    summarise(tidy(model_fit))
+
+# to do: add predictions to dataframe or produce predictions separately 
+
+jmp_all_model_fit |> 
+    mutate(predictions = map2(.x = model_fit, .y = data, .f = predict))
+
+
+# example from SO: https://stackoverflow.com/questions/32773617/add-column-of-predicted-values-to-data-frame-with-dplyr
+
+
+library(purrr)
+library(tidyr)
+library(broom)
+
+exampleTable <- data.frame(
+  x = c(1:5, 1:5),
+  y = c((1:5) + rnorm(5), 2*(5:1)),
+  groups = rep(LETTERS[1:2], each = 5)
+)
+
+exampleTable %>% 
+  group_by(groups) %>%
+  nest() %>% 
+  mutate(model = data %>% map(~lm(y ~ x, data = .))) %>% 
+  mutate(Pred = map2(model, data, predict)) %>% 
+  unnest(Pred, data)
+
 ```
 
