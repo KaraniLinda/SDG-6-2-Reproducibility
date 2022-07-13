@@ -5,7 +5,7 @@ execute:
   echo: false
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -181,6 +181,7 @@ jmp_all_model_fit <- jmp_all_mean_value |>
     mutate(model_fit = list(lm(mean_value ~ year, data = data))) %>% 
     mutate(fit = map(model_fit, ~ .$fitted.values)) %>% 
     mutate(data = map2(data, model_fit, add_predictions))
+
 jmp_all_model_fit
 
     
@@ -202,6 +203,50 @@ jmp_all_model_fit %>%
 
 
 ```
+
+```{r}
+
+# nest_by documentation: https://dplyr.tidyverse.org/reference/nest_by.html
+
+jmp_models <- jmp_all_mean_value |> 
+    nest_by(iso3, residence, var_long) |> 
+    mutate(model = list(lm(mean_value ~ year, data = data))) 
+
+
+jmp_models |> 
+    summarise(rsq = summary(model)$r.squared)
+
+jmp_models |> 
+    summarise(broom::glance(model))
+
+jmp_models |> 
+    summarise(broom::tidy(model))
+
+
+dat_year <- tibble(year = seq(2000, 2020, 1))
+
+jmp_fitted <- jmp_models |> 
+    summarise(augment(model, newdata = dat_year))
+
+jmp_models_without_fitted <- jmp_models |> 
+    summarise(augment(model)) |> 
+    select(-.fitted)
+
+
+```
+
+
+# Spread data
+
+```{r}
+
+jmp_fitted |> 
+    ungroup() |> 
+    filter(iso3 == "UGA") |> 
+    pivot_wider(var_long)
+
+```
+
 
 ```{r}
 # example from SO: https://stackoverflow.com/questions/32773617/add-column-of-predicted-values-to-data-frame-with-dplyr
