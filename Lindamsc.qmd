@@ -5,7 +5,7 @@ execute:
   echo: false
   warning: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r}
@@ -167,6 +167,12 @@ jmp_urban_rural_improved_shared <- jmpraw |>
     filter(residence != "national",
            var_long %in% c("Improved", "Shared"))
 
+jmp_urban_rural_improved_shared
+
+```
+
+```{r}
+
 # summarise data by year
 
 jmp_all_mean_value <- jmp_urban_rural_improved_shared |> 
@@ -174,35 +180,11 @@ jmp_all_mean_value <- jmp_urban_rural_improved_shared |>
     summarise(mean_value = mean(value)) |> 
     ungroup() 
 
-# create model fit for all countries, residence and variables 
 
-jmp_all_model_fit <- jmp_all_mean_value |> 
-    nest_by(iso3, residence, var_long) |> 
-    mutate(model_fit = list(lm(mean_value ~ year, data = data))) %>% 
-    mutate(fit = map(model_fit, ~ .$fitted.values)) %>% 
-    mutate(data = map2(data, model_fit, add_predictions))
+```    
 
-jmp_all_model_fit
+# Create a tidy dataframe with model intercept and coefficient
 
-    
-# Create a tidy dataframe with model intercept and coefficients
-
-jmp_all_model_fit |> 
-    summarise(tidy(model_fit))
-
-# to do: add predictions to dataframe or produce predictions separately 
-library(broom)
-
-jmp_all_model_fit <- jmp_all_mean_value |> 
-    group_by(iso3, residence, var_long) |> 
-    do(model_fit = lm("mean_value ~ year", data =.))
-
-jmp_all_model_fit %>% 
-    augment(model_fit)
-
-
-
-```
 
 ```{r}
 
@@ -221,18 +203,29 @@ jmp_models |>
 
 jmp_models |> 
     summarise(broom::tidy(model))
+```
+
+
+
+```{r}
 
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
 
 jmp_fitted <- jmp_models |> 
     summarise(augment(model, newdata = dat_year))
+jmp_fitted
+
+```
+
+
+```{r}
 
 jmp_models_without_fitted <- jmp_models |> 
     summarise(augment(model)) |> 
     select(-.fitted)
 
-
+jmp_models_without_fitted
 ```
 
 
