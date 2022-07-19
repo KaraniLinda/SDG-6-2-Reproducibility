@@ -204,11 +204,16 @@ jmp_models |>
 jmp_models |> 
     summarise(broom::tidy(model))
 ```
-
-
-
+#Display only coefficients
 ```{r}
+jmp_models %>% 
+    unnest() %>% 
+    head(augment())
 
+```
+
+#Adding predicted/fitted values to the model
+```{r}
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
 
@@ -227,6 +232,20 @@ jmp_models_without_fitted <- jmp_models |>
 
 jmp_models_without_fitted
 ```
+#Join input with predictions
+```{r}
+jmp_fittedandactual <-  jmp_fitted %>% 
+    left_join(jmp_all_mean_value)
+
+jmp_fittedandactual
+```
+#plot predicted vs actual values
+```{r}
+ggplot(jmp_fittedandactual, aes(x = mean_value, y= .fitted)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+```
 
 
 # Spread data
@@ -234,9 +253,7 @@ jmp_models_without_fitted
 ```{r}
 
 jmp_fitted |> 
-    ungroup() |> 
-    filter(iso3 == "UGA") |> 
-    pivot_wider(var_long)
+    pivot_wider(names_from = var_long, values_from =  .fitted)
 
 ```
 
