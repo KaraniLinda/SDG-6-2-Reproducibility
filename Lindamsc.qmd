@@ -107,7 +107,6 @@ jmpraw %>%
 
 
 
-#using the linear model to predict from 2000-2007
 
 
 
@@ -125,6 +124,15 @@ uga_rural_improved <- jmpraw %>%
 ```
 
 ```{r}
+uga_rural_improved %>% 
+    ggplot(aes(x = year, y = mean_value)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE)
+```
+#By filtering the data for Uganda and improved sanitation, we can see from the graph above that the relationship between year and the stimates is approximately linear and so we will go ahead and fit a linear regression model. The variance(distance from pints to the line) also seems constant and ence homoskedasticity is attained.
+
+
+```{r}
 
 uga_rural_improved_lm_fit <- lm(mean_value ~ year, data = uga_rural_improved)
 
@@ -139,7 +147,7 @@ glance(uga_rural_improved_lm_fit) |>
         knitr::kable(digits = 2)
 
 ```
-#using the linear model to predict from 2000-2007
+#using the linear model to predict from 2000-2020
 ```{r}
 
  
@@ -149,11 +157,45 @@ uga_values <- tibble(year = seq(2000,2020,1)) %>%
 uga_values         
 ```
 
+#Model diagnostics
+
+#Ater fitting a model, it’s necessary to check the model to see if the model satisfies the assumptions of linear regression. If the model does not fit the data well (for example, the relationship is nonlinear), then you cannot use and interpret the model.
+```{r}
+par(mfrow = c(2, 2))
+plot(uga_rural_improved_lm_fit)
+```
+
+
+# The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line.
+#The scale- location plot analyzes the homogeneity of the variance. We are also looking for a horizontal red line in this case.In this dataset, there is some evidence of homogeneity with points being equally far from the regression line across the observations.
+#The QQ plot above helps to assess the normality of residuals. Normally distributed residuals will fall along the grey dotted line as is our case above except for a few outliers
+
+#To assess whether or not outliers are driving our results we look at the residuals vs leverage plot. Standardized residuals greater than 3 or less than -3 are to be considered as outliers. In our dataset above, we do not see any values in that range (by looking at the y-axis), suggesting that there are no extreme outliers driving the results of our analysis. 
+
+
+#Histogram plotting residuals
+```{r}
+library(ggplot2)
+ggplot(uga_rural_improved_lm_fit, aes(uga_rural_improved_lm_fit$residuals)) + 
+  geom_histogram(bins = 10)
+```
+
+
+
 #Join input with predictions
 ```{r}
-uga_values %>% 
+uga_join <- uga_values %>% 
     left_join(uga_rural_improved)
 ```
+#plot
+```{r}
+uga_values %>% 
+    ggplot(aes(x = year, y = mean_value)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE)
+```
+
+
 
 # Model predictions all countries
 
