@@ -45,6 +45,9 @@ head(jmpraw)
 
 tail(jmpraw)
 ```
+
+
+
 ```{r}
 jmpraw %>% 
     count(var_short, var_long) 
@@ -118,7 +121,7 @@ uga_rural_improved <- jmpraw %>%
     group_by(year) %>% 
     summarise(mean_value = mean(value))
 
-
+uga_rural_improved
 
     
 ```
@@ -157,6 +160,22 @@ uga_values <- tibble(year = seq(2000,2020,1)) %>%
 uga_values         
 ```
 
+#Fitted values
+
+```{r}
+ggplot(uga_rural_improved, aes(x=year, y= mean_value))+
+    geom_point(alpha = 0.6)+
+    geom_point(aes(x = year, y= uga_rural_improved_lm_fit$fitted.values),
+               color = "red", alpha = 0.5) +
+    geom_segment(aes(xend = year, yend= uga_rural_improved_lm_fit$fitted.values),
+                 color = "red", linetype = "dashed", alpha =0.25)
+                  
+```
+
+
+
+
+
 #Model diagnostics
 
 #Ater fitting a model, it’s necessary to check the model to see if the model satisfies the assumptions of linear regression. If the model does not fit the data well (for example, the relationship is nonlinear), then you cannot use and interpret the model.
@@ -186,13 +205,69 @@ ggplot(uga_rural_improved_lm_fit, aes(uga_rural_improved_lm_fit$residuals)) +
 ```{r}
 uga_join <- uga_values %>% 
     left_join(uga_rural_improved)
+
+uga_join
 ```
-#plot
+#Trying to fit a generalized additive model since the R-SQUARED in OLS is low
 ```{r}
-uga_values %>% 
+
+library(mgcv)
+
+newd <- tibble(year = seq(2000,2020,1))
+gammodel <- gam(mean_value ~ year, family=gaussian, data = uga_rural_improved)
+
+gam.pred <- predict.gam(gammodel, newd)
+
+summary(gammodel)
+
+```
+
+#The r squared using the GAM is almost similar to the r squared using OLS regression
+
+
+
+#Prediction using quadratic linear
+
+```{r}
+
+
+    
+uga_rural_improved_quadratic <- lm(mean_value ~ poly(year,3), data = uga_rural_improved)
+
+summary(uga_rural_improved_quadratic)
+    
+library(broom)
+
+tidy(uga_rural_improved_quadratic) |>  
+    knitr::kable(digits = 2)
+
+glance(uga_rural_improved_quadratic) |> 
+        knitr::kable(digits = 2)
+
+```
+
+
+##Adding a quadratic and polynomial term does not change the r squared
+
+```{r}
+library(segmented)
+
+yeard <- tibble(year = seq(2000,2020,1))
+
+knot <- 2005 
+years.sp <- yeard - knot
+years.sp[years.sp < 0] <- 0
+
+plm <- lm(mean_value ~ yeard + years.sp, data = uga_rural_improved)
+
+summary(plm)
+```
+
+```{r}
+uga_rural_improved %>% 
     ggplot(aes(x = year, y = mean_value)) +
     geom_point() +
-    geom_smooth(method = "lm", se = FALSE)
+    geom_smooth(method = "gam", se = FALSE)
 ```
 
 
@@ -246,6 +321,17 @@ jmp_models |>
 jmp_models |> 
     summarise(broom::tidy(model))
 ```
+
+#Model diagnostics
+
+```{r}
+par(mfrow = c(2, 2))
+plot(jmp_models)
+```
+
+
+
+
 #Display only coefficients
 ```{r}
 jmp_models %>% 
@@ -300,26 +386,5 @@ jmp_fitted |>
 ```
 
 
-```{r}
-# example from SO: https://stackoverflow.com/questions/32773617/add-column-of-predicted-values-to-data-frame-with-dplyr
 
-
-library(purrr)
-library(tidyr)
-library(broom)
-
-exampleTable <- data.frame(
-  x = c(1:5, 1:5),
-  y = c((1:5) + rnorm(5), 2*(5:1)),
-  groups = rep(LETTERS[1:2], each = 5)
-)
-
-exampleTable %>% 
-  group_by(groups) %>%
-  nest() %>% 
-  mutate(model = data %>% map(~lm(y ~ x, data = .))) %>% 
-  mutate(Pred = map2(model, data, predict)) %>% 
-  unnest(Pred, data)
-
-```
 
