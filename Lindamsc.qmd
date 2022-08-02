@@ -175,6 +175,14 @@ ggplot(uga_rural_improved, aes(x=year, y= mean_value))+
 
 
 
+```{r}
+uga_rural_improved %>% 
+    ggplot(aes(x = year, y = mean_value)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE)
+    
+```
+
 
 #Model diagnostics
 
@@ -299,6 +307,17 @@ uga_values_spline <- tibble(year = seq(2000,2020,1)) %>%
 uga_values_spline
 
 
+```
+##plot using splines
+
+```{r}
+
+library(tidyverse)
+uga_rural_improved %>% 
+    ggplot(aes(x = year, y = mean_value)) +
+    geom_point() +
+    geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2003,2010)),se = FALSE)+
+    geom_line(data = uga_values_spline, aes(x = year, y=pred),,col="blue",lwd=1.5)
 ```
 
 
