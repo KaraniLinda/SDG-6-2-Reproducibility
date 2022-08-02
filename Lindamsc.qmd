@@ -226,13 +226,11 @@ summary(gammodel)
 
 
 
-#Prediction using quadratic linear
+#Fitting polynomial of order 4
 
 ```{r}
 
-
-    
-uga_rural_improved_quadratic <- lm(mean_value ~ poly(year,3), data = uga_rural_improved)
+uga_rural_improved_quadratic <- lm(mean_value ~ poly(year,4), data = uga_rural_improved)
 
 summary(uga_rural_improved_quadratic)
     
@@ -247,21 +245,62 @@ glance(uga_rural_improved_quadratic) |>
 ```
 
 
-##Adding a quadratic and polynomial term does not change the r squared
+
+
+##Adding a polynomial term significantly improves  the r squared
+
+##Predictions using a polynomial term of order 4
 
 ```{r}
-library(segmented)
+uga_values_quadratic <- tibble(year = seq(2000,2020,1)) %>%
+    add_predictions(model = uga_rural_improved_quadratic)
 
-yeard <- tibble(year = seq(2000,2020,1))
-
-knot <- 2005 
-years.sp <- yeard - knot
-years.sp[years.sp < 0] <- 0
-
-plm <- lm(mean_value ~ yeard + years.sp, data = uga_rural_improved)
-
-summary(plm)
+uga_values_quadratic
 ```
+##plot
+
+```{r}
+
+
+par(mfrow = c(2, 2))
+plot(uga_rural_improved_quadratic)
+
+```
+#Fitting a spline
+
+```{r}
+library(splines)
+
+
+
+uga_rural_improved_spline <- lm(mean_value~bs(year,knots=c(2003,2010)), data = uga_rural_improved)
+
+summary(uga_rural_improved_spline)
+
+
+    
+library(broom)
+
+tidy(uga_rural_improved_spline) |>  
+    knitr::kable(digits = 2)
+
+glance(uga_rural_improved_spline) |> 
+        knitr::kable(digits = 2)
+
+```
+
+
+##Predictions using splines
+
+```{r}
+uga_values_spline <- tibble(year = seq(2000,2020,1)) %>%
+    add_predictions(model = uga_rural_improved_spline)
+
+uga_values_spline
+
+
+```
+
 
 ```{r}
 uga_rural_improved %>% 
