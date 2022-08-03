@@ -14,6 +14,9 @@ library(modelr)
 ```
 
 ```{r}
+#| child: "analysis/model-fit.qmd"
+
+
 ```
 
 # Data import
@@ -46,27 +49,22 @@ head(jmpraw)
 tail(jmpraw)
 ```
 
-
-
 ```{r}
 jmpraw %>% 
     count(var_short, var_long) 
 
 ```
 
-
-
 # Methods
 
 ## JMP Methods report
 
-- 
-
+-   
 
 # First linear model
 
-- Model for Uganda, rural, improved
-- Data is not linear
+-   Model for Uganda, rural, improved
+-   Data is not linear
 
 ## Observations
 
@@ -77,8 +75,6 @@ Learn more about modeling in R:
 -   R Packages: Tidymodels - https://www.tidymodels.org/
 
 https://broom.tidymodels.org/articles/broom.html
-
-
 
 ```{r}
 #| echo: true
@@ -95,7 +91,7 @@ jmpraw |>
 
 ## Reference papers
 
-- LINK
+-   LINK
 
 **Gaps identified**
 
@@ -107,12 +103,6 @@ jmpraw %>%
     geom_smooth(method = "lm", se = FALSE)
 
 ```
-
-
-
-
-
-
 
 ```{r}
 
@@ -132,8 +122,8 @@ uga_rural_improved %>%
     geom_point() +
     geom_smooth(method = "lm", se = FALSE)
 ```
-#By filtering the data for Uganda and improved sanitation, we can see from the graph above that the relationship between year and the stimates is approximately linear and so we will go ahead and fit a linear regression model. The variance(distance from pints to the line) also seems constant and ence homoskedasticity is attained.
 
+By filtering the data for Uganda and improved sanitation, we can see from the graph above that the relationship between year and the stimates is approximately linear and so we will go ahead and fit a linear regression model. The variance(distance from pints to the line) also seems constant and ence homoskedasticity is attained.
 
 ```{r}
 
@@ -150,7 +140,9 @@ glance(uga_rural_improved_lm_fit) |>
         knitr::kable(digits = 2)
 
 ```
-#using the linear model to predict from 2000-2020
+
+using the linear model to predict from 2000-2020
+
 ```{r}
 
  
@@ -160,7 +152,7 @@ uga_values <- tibble(year = seq(2000,2020,1)) %>%
 uga_values         
 ```
 
-#Fitted values
+# Fitted values
 
 ```{r}
 ggplot(uga_rural_improved, aes(x=year, y= mean_value))+
@@ -172,9 +164,6 @@ ggplot(uga_rural_improved, aes(x=year, y= mean_value))+
                   
 ```
 
-
-
-
 ```{r}
 uga_rural_improved %>% 
     ggplot(aes(x = year, y = mean_value)) +
@@ -183,40 +172,40 @@ uga_rural_improved %>%
     
 ```
 
+# Model diagnostics
 
-#Model diagnostics
+Ater fitting a model, it's necessary to check the model to see if the model satisfies the assumptions of linear regression. If the model does not fit the data well (for example, the relationship is nonlinear), then you cannot use and interpret the model.
 
-#Ater fitting a model, it’s necessary to check the model to see if the model satisfies the assumptions of linear regression. If the model does not fit the data well (for example, the relationship is nonlinear), then you cannot use and interpret the model.
 ```{r}
 par(mfrow = c(2, 2))
 plot(uga_rural_improved_lm_fit)
 ```
 
+The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line.
 
-# The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line.
-#The scale- location plot analyzes the homogeneity of the variance. We are also looking for a horizontal red line in this case.In this dataset, there is some evidence of homogeneity with points being equally far from the regression line across the observations.
-#The QQ plot above helps to assess the normality of residuals. Normally distributed residuals will fall along the grey dotted line as is our case above except for a few outliers
+The scale- location plot analyzes the homogeneity of the variance. We are also looking for a horizontal red line in this case.In this dataset, there is some evidence of homogeneity with points being equally far from the regression line across the observations. #The QQ plot above helps to assess the normality of residuals. Normally distributed residuals will fall along the grey dotted line as is our case above except for a few outliers
 
-#To assess whether or not outliers are driving our results we look at the residuals vs leverage plot. Standardized residuals greater than 3 or less than -3 are to be considered as outliers. In our dataset above, we do not see any values in that range (by looking at the y-axis), suggesting that there are no extreme outliers driving the results of our analysis. 
+To assess whether or not outliers are driving our results we look at the residuals vs leverage plot. Standardized residuals greater than 3 or less than -3 are to be considered as outliers. In our dataset above, we do not see any values in that range (by looking at the y-axis), suggesting that there are no extreme outliers driving the results of our analysis.
 
+# Histogram plotting residuals
 
-#Histogram plotting residuals
 ```{r}
 library(ggplot2)
 ggplot(uga_rural_improved_lm_fit, aes(uga_rural_improved_lm_fit$residuals)) + 
   geom_histogram(bins = 10)
 ```
 
+# Join input with predictions
 
-
-#Join input with predictions
 ```{r}
 uga_join <- uga_values %>% 
     left_join(uga_rural_improved)
 
 uga_join
 ```
-#Trying to fit a generalized additive model since the R-SQUARED in OLS is low
+
+# Trying to fit a generalized additive model since the R-SQUARED in OLS is low
+
 ```{r}
 
 library(mgcv)
@@ -230,11 +219,9 @@ summary(gammodel)
 
 ```
 
-#The r squared using the GAM is almost similar to the r squared using OLS regression
+The r squared using the GAM is almost similar to the r squared using OLS regression
 
-
-
-#Fitting polynomial of order 4
+# Fitting polynomial of order 4
 
 ```{r}
 
@@ -252,12 +239,9 @@ glance(uga_rural_improved_quadratic) |>
 
 ```
 
+## Adding a polynomial term significantly improves the r squared
 
-
-
-##Adding a polynomial term significantly improves  the r squared
-
-##Predictions using a polynomial term of order 4
+## Predictions using a polynomial term of order 4
 
 ```{r}
 uga_values_quadratic <- tibble(year = seq(2000,2020,1)) %>%
@@ -265,7 +249,8 @@ uga_values_quadratic <- tibble(year = seq(2000,2020,1)) %>%
 
 uga_values_quadratic
 ```
-##plot
+
+## plot
 
 ```{r}
 
@@ -274,7 +259,8 @@ par(mfrow = c(2, 2))
 plot(uga_rural_improved_quadratic)
 
 ```
-#Fitting a spline
+
+# Fitting a spline
 
 ```{r}
 library(splines)
@@ -297,8 +283,7 @@ glance(uga_rural_improved_spline) |>
 
 ```
 
-
-##Predictions using splines
+## Predictions using splines
 
 ```{r}
 uga_values_spline <- tibble(year = seq(2000,2020,1)) %>%
@@ -308,7 +293,8 @@ uga_values_spline
 
 
 ```
-##plot using splines
+
+## plot using splines
 
 ```{r}
 
@@ -317,9 +303,8 @@ uga_rural_improved %>%
     ggplot(aes(x = year, y = mean_value)) +
     geom_point() +
     geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2003,2010)),se = FALSE)+
-    geom_line(data = uga_values_spline, aes(x = year, y=pred),,col="blue",lwd=1.5)
+    geom_line(data = uga_values_spline, aes(x = year, y=pred),col="blue",lwd=1.5)
 ```
-
 
 ```{r}
 uga_rural_improved %>% 
@@ -327,8 +312,6 @@ uga_rural_improved %>%
     geom_point() +
     geom_smooth(method = "gam", se = FALSE)
 ```
-
-
 
 # Model predictions all countries
 
@@ -356,10 +339,9 @@ jmp_all_mean_value <- jmp_urban_rural_improved_shared |>
     ungroup() 
 
 
-```    
+```
 
 # Create a tidy dataframe with model intercept and coefficient
-
 
 ```{r}
 
@@ -380,25 +362,24 @@ jmp_models |>
     summarise(broom::tidy(model))
 ```
 
-#Model diagnostics
+# Model diagnostics
 
 ```{r}
 par(mfrow = c(2, 2))
-plot(jmp_models)
+#plot(jmp_models)
 ```
 
+# Display only coefficients
 
-
-
-#Display only coefficients
 ```{r}
-jmp_models %>% 
-    unnest() %>% 
-    head(augment())
+# jmp_models %>% 
+#     unnest(model) %>% 
+#     head(augment())
 
 ```
 
-#Adding predicted/fitted values to the model
+# Adding predicted/fitted values to the model
+
 ```{r}
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
@@ -409,7 +390,6 @@ jmp_fitted
 
 ```
 
-
 ```{r}
 
 jmp_models_without_fitted <- jmp_models |> 
@@ -418,21 +398,24 @@ jmp_models_without_fitted <- jmp_models |>
 
 jmp_models_without_fitted
 ```
-#Join input with predictions
+
+# Join input with predictions
+
 ```{r}
 jmp_fittedandactual <-  jmp_fitted %>% 
     left_join(jmp_all_mean_value)
 
 jmp_fittedandactual
 ```
-#plot predicted vs actual values
+
+# plot predicted vs actual values
+
 ```{r}
 ggplot(jmp_fittedandactual, aes(x = mean_value, y= .fitted)) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
   labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
 ```
-
 
 # Spread data
 
@@ -442,7 +425,3 @@ jmp_fitted |>
     pivot_wider(names_from = var_long, values_from =  .fitted)
 
 ```
-
-
-
-

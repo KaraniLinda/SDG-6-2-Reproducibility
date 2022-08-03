@@ -1,0 +1,39 @@
+---
+title: "Thesis report"
+format: html
+editor: source
+bibliography: msc-thesis-lkarani.bib
+csl: apa.csl
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Introduction
+
+```{r}
+#| child: "sections/01-introduction.qmd"
+```
+
+# Methods
+
+# Results & Discussion
+
+```{r}
+#| child: "sections/03-model-fit-decision-tree.qmd"
+#| 
+```
+
+Write some text [@fuller2016tracking]
+
+Another reference by @fuller2016tracking 
+
+Two references [@quispe-coica2022global; @fuller2016tracking]
+
+
+# Conclusions
+
+# Recommendations
+
+# References

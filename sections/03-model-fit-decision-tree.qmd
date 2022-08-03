@@ -1,0 +1,72 @@
+---
+title: "Untitled"
+format: html
+execute: 
+  echo: false
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+
+```{r}
+
+data <- read_rds(here("data/2020-09-30_jmp_sanitation_raw_data.rds"))
+
+```
+
+Here is your next cross-reference @fig-plot-urban-improved.
+
+```{r}
+#| fig-cap: "Here is a caption for the plot"
+#| label: fig-plot-urban-improved
+
+data |> 
+    filter(residence == "urban",
+           var_long == "Improved") |> 
+    group_by(iso3) |> 
+    filter(year == max(year)) |> 
+    
+    ggplot(aes(x = value, y = iso3)) +
+    labs(title = "Plot title") +
+    geom_col()
+
+```
+
+Now when you write text and you want to refer to @fig-plot-urban.
+
+```{r}
+#| fig-cap: "Here is a caption for the plot"
+#| label: fig-plot-urban
+
+data |> 
+    filter(residence == "urban",
+           var_long == "Improved") |> 
+    group_by(iso3) |> 
+    filter(year == max(year)) |> 
+    
+    ggplot(aes(x = value, y = iso3)) +
+    labs(title = "Plot title") +
+    geom_col()
+
+```
+
+# Table
+
+You can reference the table @tbl-urban-data.
+
+```{r}
+#| tbl-cap: "Here is a table caption."
+#| label: tbl-urban-data
+
+
+data |> 
+    filter(residence == "urban",
+           var_long == "Improved") |> 
+    count(type) |> 
+    knitr::kable()
+
+```
+
