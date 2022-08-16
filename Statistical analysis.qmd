@@ -1,5 +1,5 @@
 ---
-title: "SDG6reproducibility"
+title: "SDG6reproducibility statistical analysis"
 format: html
 execute:
   echo: false
@@ -32,13 +32,12 @@ jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 Text
 
 ```{r}
-#| include: false 
 
 glimpse(jmpraw)
 ```
 
 ```{r}
-#| include: false 
+
 
 head(jmpraw)
 ```
@@ -51,8 +50,8 @@ tail(jmpraw)
 
 ```{r}
 jmpraw %>% 
-    count(var_short, var_long) 
-
+    select(san_service_chain, var_long, iso3, year) %>% 
+    filter(san_service_chain == "containment")
 ```
 
 # Methods
@@ -279,7 +278,7 @@ tidy(uga_rural_improved_spline) |>
     knitr::kable(digits = 2)
 
 glance(uga_rural_improved_spline) |> 
-        knitr::kable(digits = 2)
+        knitr::kable(digits = 2)""
 
 ```
 
@@ -313,6 +312,8 @@ uga_rural_improved %>%
     geom_smooth(method = "gam", se = FALSE)
 ```
 
+
+
 # Model predictions all countries
 
 ```{r}
@@ -328,6 +329,8 @@ jmp_urban_rural_improved_shared <- jmpraw |>
 jmp_urban_rural_improved_shared
 
 ```
+
+
 
 ```{r}
 
@@ -415,6 +418,8 @@ ggplot(jmp_fittedandactual, aes(x = mean_value, y= .fitted)) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
   labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
 ```
 
 # Spread data
@@ -425,3 +430,5 @@ jmp_fitted |>
     pivot_wider(names_from = var_long, values_from =  .fitted)
 
 ```
+
+
