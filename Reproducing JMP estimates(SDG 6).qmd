@@ -20,15 +20,15 @@ jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
 # JMP Primary indicators:
 
-s1 : The proportion of population that uses improved sanitation facilities 
+s1 : The proportion of population that uses improved sanitation facilities
 
-s2 : The proportion of population that uses improved sanitation facilities connected to sewers 
+s2 : The proportion of population that uses improved sanitation facilities connected to sewers
 
-s3 : The proportion of population that uses improved sanitation facilities connected to septic tanks 
+s3 : The proportion of population that uses improved sanitation facilities connected to septic tanks
 
 s6: The proportion of population that uses no sanitation facilities(open defecation)
 
-Improved refers only to the type of facity used irrespective of whether the facilities are shared by more than one household
+Improved refers only to the type of facility used irrespective of whether the facilities are shared by more than one household
 
 ## s1 : The proportion of population that uses improved sanitation facilities
 
@@ -229,4 +229,3 @@ jmp_fitted <- jmp_models |>
     summarise(augment(model, newdata = dat_year))
 jmp_fitted
 ```
-
