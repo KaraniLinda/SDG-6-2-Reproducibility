@@ -6,7 +6,7 @@ execute:
   echo: true
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -43,8 +43,8 @@ jmp_summary_raw <- jmpraw %>%
 
 jmp_summary_raw %>% 
     count(iso3)
-    
-    
+
+
 ```
 
 ```{r}
@@ -80,18 +80,36 @@ dat_year
 
 if(max(jmp_all_mean_value$year) - min(jmp_all_mean_value$year)) ">= 5" { 
     jmp_models <- jmp_all_mean_value |> 
-    nest_by(iso3, residence, var_long) |> 
-    mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
+        nest_by(iso3, residence, var_long) |> 
+        mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
         summarise(broom::tidy(model)) %>% 
         summarise(augment(model, newdata = dat_year))
-        
-}
     
-
- 
-
+}
 
 
+min_max_year_iso3 <- jmp_all_mean_value |> 
+    group_by(iso3) |> 
+    summarise(
+        min = min(year),
+        max = max(year)
+    ) 
+
+year_seq <- list()
+
+for (name in min_max_year_iso3$iso3) {
+    
+    year_seq[[name]] <- tibble(
+        iso3 = name,
+        year = seq(filter(min_max_year_iso3, iso3 == name)$min - 2,
+                   filter(min_max_year_iso3, iso3 == name)$max + 2,
+                   by = 1)
+    )
+}
+
+year_seq_df <- year_seq |> 
+    bind_rows() |> 
+    filter(year >= 2000)
 
 ```
 
