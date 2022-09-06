@@ -6,7 +6,7 @@ execute:
   echo: true
   warning: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r}
@@ -67,26 +67,8 @@ jmp_all_mean_value <- jmp_urban_rural_improved |>
 jmp_all_mean_value
 ```
 
-
 ```{r}
-# if statement 
-
-dat_year <-
-    jmp_all_mean_value %>% 
-    group_by(iso3) %>% 
-    mutate(year = seq(min(jmp_all_mean_value$year)-2)>2000 : max(jmp_all_mean_value$year))
-dat_year
-
-
-if(max(jmp_all_mean_value$year) - min(jmp_all_mean_value$year)) ">= 5" { 
-    jmp_models <- jmp_all_mean_value |> 
-        nest_by(iso3, residence, var_long) |> 
-        mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
-        summarise(broom::tidy(model)) %>% 
-        summarise(augment(model, newdata = dat_year))
-    
-}
-
+# Generating a tibble 
 
 min_max_year_iso3 <- jmp_all_mean_value |> 
     group_by(iso3) |> 
@@ -94,8 +76,10 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         min = min(year),
         max = max(year)
     ) 
+   
 
 year_seq <- list()
+
 
 for (name in min_max_year_iso3$iso3) {
     
@@ -107,13 +91,61 @@ for (name in min_max_year_iso3$iso3) {
     )
 }
 
+
+
 year_seq_df <- year_seq |> 
     bind_rows() |> 
     filter(year >= 2000)
+year_seq_df
+
+```
+
+```{r}
+jmp_average_model <- jmp_all_mean_value %>% 
+    group_by(iso3) %>% 
+    summarise(averageestimate = mean(mean_value))
+jmp_average_model
+```
+
+```{r}
+# Join years data frame with the average of estimates
+
+averageestimates <- left_join(year_seq_df, jmp_average_model, by = "iso3")
+averageestimates
+
 
 ```
 
 
+```{r}
+
+min_max_year_iso3 %>% 
+    filter((max - min) < 5)
+```
+
+
+#if statements for model creation
+```{r}
+
+library(broom)
+
+if( (min_max_year_iso3$max - min_max_year_iso3$min) >= 5)  { 
+    jmp_models <- jmp_all_mean_value %>% 
+        nest_by(iso3, residence, var_long) %>% 
+        mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
+        summarise(augment(model, newdata = year_seq_df))
+    
+} else {
+    averageestimates <- left_join(year_seq_df, jmp_average_model, by = "iso3")
+
+}
+     
+
+
+jmp_models
+averageestimates
+
+```
 
 ```{r}
 # nest_by documentation: https://dplyr.tidyverse.org/reference/nest_by.html
