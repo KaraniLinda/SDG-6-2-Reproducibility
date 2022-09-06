@@ -63,7 +63,39 @@ jmp_all_mean_value <- jmp_urban_rural_improved |>
     group_by(iso3, residence, var_long, year) |> 
     summarise(mean_value = mean(value)) |> 
     ungroup()
+
+jmp_all_mean_value
 ```
+
+
+```{r}
+# if statement 
+
+dat_year <-
+    jmp_all_mean_value %>% 
+    group_by(iso3) %>% 
+    mutate(year = seq(min(jmp_all_mean_value$year)-2)>2000 : max(jmp_all_mean_value$year))
+dat_year
+
+
+if(max(jmp_all_mean_value$year) - min(jmp_all_mean_value$year)) ">= 5" { 
+    jmp_models <- jmp_all_mean_value |> 
+    nest_by(iso3, residence, var_long) |> 
+    mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
+        summarise(broom::tidy(model)) %>% 
+        summarise(augment(model, newdata = dat_year))
+        
+}
+    
+
+ 
+
+
+
+
+```
+
+
 
 ```{r}
 # nest_by documentation: https://dplyr.tidyverse.org/reference/nest_by.html
