@@ -6,12 +6,13 @@ execute:
   echo: true
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
 library(tidyverse)
 library(modelr)
+library(broom)
 ```
 
 ```{r}
@@ -38,7 +39,7 @@ Improved refers only to the type of facility used irrespective of whether the fa
 
 jmp_summary_raw <- jmpraw %>%
     filter(var_long == "Improved") %>% 
-    group_by(iso3,year) %>% 
+    group_by(iso3, year) %>% 
     summarise(mean_value = mean(value))
 
 jmp_summary_raw %>% 
@@ -76,10 +77,24 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         min = min(year),
         max = max(year)
     ) 
-   
 
+
+diff_smaller_five_year_vec <- min_max_year_iso3 |> 
+    mutate(diff = max - min) |> 
+    filter(diff < 5) |>
+    pull(iso3)
+
+diff_greater_four_year_vec <- min_max_year_iso3 |> 
+    mutate(diff = max - min) |> 
+    filter(diff >= 5) |>
+    pull(iso3)
+
+
+```
+
+
+```{r}
 year_seq <- list()
-
 
 for (name in min_max_year_iso3$iso3) {
     
@@ -91,59 +106,50 @@ for (name in min_max_year_iso3$iso3) {
     )
 }
 
-
-
 year_seq_df <- year_seq |> 
     bind_rows() |> 
-    filter(year >= 2000)
-year_seq_df
-
-```
-
-```{r}
-jmp_average_model <- jmp_all_mean_value %>% 
-    group_by(iso3) %>% 
-    summarise(averageestimate = mean(mean_value))
-jmp_average_model
-```
-
-```{r}
-# Join years data frame with the average of estimates
-
-averageestimates <- left_join(year_seq_df, jmp_average_model, by = "iso3")
-averageestimates
-
-
+    filter(year >= 2000 & year <= 2020)
 ```
 
 
-```{r}
 
-min_max_year_iso3 %>% 
-    filter((max - min) < 5)
+```{r}
+jmp_all_mean_value %>%
+    filter(iso3 == "AFG" | 
+               iso3 == "UGA") 
+
+jmp_all_mean_value %>%
+    filter(iso3 %in% c("AFG", "UGA"))
+
+iso3_vector <- c("AFG", "UGA")
+
+jmp_all_mean_value %>%
+    filter(iso3 %in% iso3_vector)
 ```
 
 
-#if statements for model creation
+# Mean estimates
+
 ```{r}
 
-library(broom)
-
-if( (min_max_year_iso3$max - min_max_year_iso3$min) >= 5)  { 
-    jmp_models <- jmp_all_mean_value %>% 
-        nest_by(iso3, residence, var_long) %>% 
-        mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
-        summarise(augment(model, newdata = year_seq_df))
-    
-} else {
-    averageestimates <- left_join(year_seq_df, jmp_average_model, by = "iso3")
-
-}
-     
+jmp_mean_estimates <- jmp_all_mean_value %>%
+    filter(iso3 %in% diff_smaller_five_year_vec) |> 
+    group_by(iso3, residence, var_long) %>% 
+    summarise(average_estimate = mean(mean_value)) |> 
+    left_join(year_seq_df)
 
 
-jmp_models
-averageestimates
+```
+
+# Model estimates
+
+```{r}
+
+jmp_models <- jmp_all_mean_value %>% 
+    filter(iso3 %in% diff_greater_four_year_vec) |> 
+    nest_by(iso3, residence, var_long) %>% 
+    mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
+    summarise(augment(model, newdata = filter(year_seq_df, iso3 %in% diff_greater_four_year_vec))) 
 
 ```
 
