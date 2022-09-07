@@ -38,12 +38,13 @@ Improved refers only to the type of facility used irrespective of whether the fa
 #We will begin by counting the estimates of each country
 
 jmp_summary_raw <- jmpraw %>%
-    filter(var_long == "Improved") %>% 
+    #filter(var_long == "Improved") %>% 
     group_by(iso3, year) %>% 
     summarise(mean_value = mean(value))
 
 jmp_summary_raw %>% 
     count(iso3)
+
 
 
 ```
