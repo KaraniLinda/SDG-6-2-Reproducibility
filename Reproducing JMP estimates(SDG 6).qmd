@@ -151,6 +151,8 @@ jmp_models <- jmp_all_mean_value %>%
     mutate(model = list(lm(mean_value ~ year, data = data))) %>% 
     summarise(augment(model, newdata = filter(year_seq_df, iso3 %in% diff_greater_four_year_vec))) 
 
+jmp_models
+
 ```
 
 ```{r}
