@@ -71,7 +71,7 @@ jmp_all_mean_value
 # Generating a tibble 
 
 min_max_year_iso3 <- jmp_all_mean_value |> 
-    group_by(iso3) |> 
+    group_by(iso3, var_long) |> 
     summarise(
         min = min(year),
         max = max(year)
@@ -100,18 +100,20 @@ diff_smaller_five_year_vec
 year_seq <- list()
 
 for (name in min_max_year_iso3$iso3) {
-    
-    year_seq[[name]] <- tibble(
+    for(variable in min_max_year_iso3$var_long){
+        year_seq[[name, variable]] <- tibble(
         iso3 = name,
-        year = seq(filter(min_max_year_iso3, iso3 == name)$min - 2,
-                   filter(min_max_year_iso3, iso3 == name)$max + 2,
+        var_long = variable,
+        year = seq(filter(min_max_year_iso3, iso3 == name & var_long == variable)$min - 2,
+                   filter(min_max_year_iso3, iso3 == name & var_long == variable)$max + 2,
                    by = 1)
     )
+    }
 }
-
 year_seq_df <- year_seq |> 
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
+
 
 
 ```
