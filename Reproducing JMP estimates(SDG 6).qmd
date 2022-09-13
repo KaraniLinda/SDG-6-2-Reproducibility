@@ -6,7 +6,7 @@ execute:
   echo: true
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -47,8 +47,7 @@ glimpse(jmpraw)
 jmp_urban_rural <- jmpraw %>%  
     filter(residence != "national")
 
-jmp_urban_rural_improved
-
+jmp_urban_rural
 ```
 
 ```{r}
@@ -62,7 +61,7 @@ jmp_all_mean_value <- jmp_urban_rural |>
     group_by(iso3, residence, var_long, year) |> 
     summarise(mean_value = mean(value)) %>% 
     ungroup()
-  
+
 
 jmp_all_mean_value
 ```
@@ -77,7 +76,6 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         max = max(year)
     ) 
 
-
 diff_smaller_five_year_vec <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
     filter(diff < 5) |>
@@ -89,7 +87,6 @@ diff_greater_four_year_vec <- min_max_year_iso3 |>
     pull(iso3)
 
 
-
 min_max_year_iso3
 diff_smaller_five_year_vec
 
@@ -97,23 +94,43 @@ diff_smaller_five_year_vec
 
 
 ```{r}
-year_seq <- list()
 
-for (name in min_max_year_iso3$iso3) {
-    for(variable in min_max_year_iso3$var_long){
-        year_seq[[name, variable]] <- tibble(
-        iso3 = name,
-        var_long = variable,
-        year = seq(filter(min_max_year_iso3, iso3 == name & var_long == variable)$min - 2,
-                   filter(min_max_year_iso3, iso3 == name & var_long == variable)$max + 2,
-                   by = 1)
-    )
+
+nested_list <- list()
+
+# TODO: Improve this nested for loop (current execution time is about 15s)
+
+filter(min_max_year_iso3, iso3 == "AFG")$var_long
+
+for (name in unique(min_max_year_iso3$iso3)) {
+    
+    for (var in filter(min_max_year_iso3, iso3 == name)$var_long) {
+        
+        nested_list[[name]][[var]] <- tibble(
+            iso3 = name,
+            var_long = var,
+            year = seq(from = filter(min_max_year_iso3_nested, iso3 == name, var_long == var) %>% 
+                           pull(min) - 2,
+                       to = filter(min_max_year_iso3_nested, iso3 == name, var_long == var) %>% 
+                           pull(max) + 2,
+                       by = 1)
+        )
+        
     }
 }
-year_seq_df <- year_seq |> 
+
+iso3_var_long_list <- list()
+
+for (name in unique(min_max_year_iso3$iso3)) {
+
+iso3_var_long_list[[name]] <- nested_list[[name]] %>% 
+    bind_rows()
+    
+}
+
+year_seq_df <- iso3_var_long_list %>% 
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
-
 
 
 ```
@@ -164,7 +181,13 @@ jmp_models |>
 jmp_fitted <- jmp_models |>
     summarise(augment(model, newdata = year_seq_df))
 
-jmp_fitted
+year_seq_df %>% 
+    filter(iso3 == "AFG") %>% 
+    View()
+
+jmp_fitted %>%
+    filter(iso3 == "AFG") %>% 
+    View()
 ```
 
 
