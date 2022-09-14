@@ -79,7 +79,7 @@ min_max_year_iso3 <- jmp_all_mean_value |>
 diff_smaller_five_year_vec <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
     filter(diff < 5) |>
-    pull(iso3)
+    pull(unique(iso3))
 
 diff_greater_four_year_vec <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
