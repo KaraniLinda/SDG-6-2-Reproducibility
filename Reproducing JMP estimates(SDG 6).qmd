@@ -37,6 +37,14 @@ Improved refers only to the type of facility used irrespective of whether the fa
 ```{r}
 glimpse(jmpraw)
 
+jmpraw %>% 
+    filter()
+    count(san_service_chain, var_long, var_short) %>% View()
+
+jmpraw %>% 
+    count(var_long, san_service_chain) %>% 
+    filter(san_service_chain == "user interface")
+    filter(var_long == "Improved")
 ```
 
 ## s1 : The proportion of population that uses improved sanitation facilities
@@ -45,9 +53,17 @@ glimpse(jmpraw)
 
 ```{r}
 jmp_urban_rural <- jmpraw %>%  
-    filter(residence != "national")
+    filter(residence != "national") %>% 
+    filter(var_short %in% c("Open defecation", "Improved", "Shared"))
 
 jmp_urban_rural
+
+# basic services (improved, but not shared)
+# limited services (improved, but shared)
+# open defecation (open defecation)
+# unimproved services (improved - open defecation)
+
+
 ```
 
 ```{r}
@@ -95,7 +111,6 @@ diff_smaller_five_year_vec
 
 ```{r}
 
-
 nested_list <- list()
 
 # TODO: Improve this nested for loop (current execution time is about 15s)
@@ -109,9 +124,9 @@ for (name in unique(min_max_year_iso3$iso3)) {
         nested_list[[name]][[var]] <- tibble(
             iso3 = name,
             var_long = var,
-            year = seq(from = filter(min_max_year_iso3_nested, iso3 == name, var_long == var) %>% 
+            year = seq(from = filter(min_max_year_iso3, iso3 == name, var_long == var) %>% 
                            pull(min) - 2,
-                       to = filter(min_max_year_iso3_nested, iso3 == name, var_long == var) %>% 
+                       to = filter(min_max_year_iso3, iso3 == name, var_long == var) %>% 
                            pull(max) + 2,
                        by = 1)
         )
