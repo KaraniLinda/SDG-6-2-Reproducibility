@@ -180,7 +180,7 @@ par(mfrow = c(2, 2))
 plot(uga_rural_improved_lm_fit)
 ```
 
-The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line.
+The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line. From the plot we see a strong pattern in the residuals which indicates non linearity of our data
 
 The scale- location plot analyzes the homogeneity of the variance. We are also looking for a horizontal red line in this case.In this dataset, there is some evidence of homogeneity with points being equally far from the regression line across the observations. #The QQ plot above helps to assess the normality of residuals. Normally distributed residuals will fall along the grey dotted line as is our case above except for a few outliers
 
@@ -310,6 +310,20 @@ uga_rural_improved %>%
     ggplot(aes(x = year, y = mean_value)) +
     geom_point() +
     geom_smooth(method = "gam", se = FALSE)
+```
+# Fitting several LOESS regression models tp dataset
+
+```{r}
+
+
+
+uga_rural_improved_loess <- loess(mean_value~ year, data = uga_rural_improved, span = .5)
+
+summary(uga_rural_improved_loess)
+
+uga_rural_improved_smooth <- predict(uga_rural_improved_loess)
+    
+uga_rural_improved_smooth
 ```
 
 

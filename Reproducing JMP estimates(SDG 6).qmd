@@ -199,6 +199,39 @@ jmp_fitted
 
 
 ```
+
+```{r}
+#filter(year_seq_df, iso3 == "KEN", var_long == "Septic")$year
+
+nested_list <- list()
+
+
+
+
+for (name in unique(year_seq_df$iso3)) {
+    
+    for (var in filter(year_seq_df, iso3 == name)$var_long) {
+        
+        for (actyear in filter(year_seq_df, iso3 == name, var_long == var)$year) {
+        
+            nested_list <- tibble(
+                name = iso3,
+                var = var_long,
+                actyear = year
+            )
+         
+           
+
+         } 
+        
+    }
+    
+}
+        
+```
+
+
+
 # Getting the primary indicators
 
 ## s1 : The proportion of population that uses improved sanitation facilities(
