@@ -326,6 +326,17 @@ uga_rural_improved_smooth <- predict(uga_rural_improved_loess)
 uga_rural_improved_smooth
 ```
 
+```{r}
+##Visualizing loess
+
+uga_rural_improved %>% 
+    ggplot(aes(year,mean_value))+
+    geom_point()+
+      geom_smooth(method = "loess", span=0.5,
+              method.args = list(degree = 2))
+    
+    
+```
 
 
 # Model predictions all countries
