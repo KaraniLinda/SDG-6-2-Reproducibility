@@ -1,7 +1,10 @@
 ---
 title: "Research workshop summary slides"
-format: pptx
-editor: visual
+format: 
+  pptx:
+    incremental: true 
+
+
 ---
 
 # DATA SCIENCE WORKSHOP
@@ -27,11 +30,18 @@ Master Thesis Project
 -   Plots exploring the statistics
 -   Recommendations
 
+
+
 ```{r}
-#| child: "Reproducing JMP estimates(SDG 6).qmd"
+#Getting data
+
+jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
 ```
 
+```{r}
+#| child: "Reproducing JMP estimates(SDG 6).qmd"
+```
 
 ```{r}
 #Plotting R squared
@@ -43,6 +53,7 @@ jmprsquared %>%
 
 
 ```
+
 ```{r}
 jmprsquared %>% 
     filter(var_long %in% c("Sewer", "Shared") & rsq < 0.30)
@@ -60,7 +71,9 @@ jmp_all_mean_value %>%
 
 
 ```
+
 # Model performance
+
 ## Fitting different models to the data to compare performance
 
 ```{r}
@@ -79,7 +92,6 @@ rsquared <- poly4model|>
 
   
 ```
-
 
 ```{r}
 #Splines
@@ -121,9 +133,8 @@ predict(loessmodel)
 
 ```
 
-
-
 # Plots
+
 ## Plot using a 4th order polynomial
 
 ```{r}
@@ -132,6 +143,7 @@ jmp_all_mean_value %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))
 ```
+
 ## Plot using splines
 
 ```{r}
@@ -140,6 +152,7 @@ jmp_all_mean_value %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))
 ```
+
 ## Plot using GAM
 
 ```{r}
@@ -148,8 +161,8 @@ jmp_all_mean_value %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = gam, formula =  y ~ s(x, k=3))
 ```
-## Plotting using LOESS
 
+## Plotting using LOESS
 
 ```{r}
 jmp_all_mean_value %>% 
@@ -159,5 +172,3 @@ jmp_all_mean_value %>%
 
 
 ```
-
-
