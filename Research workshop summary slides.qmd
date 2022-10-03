@@ -108,9 +108,19 @@ GAMmodel <- jmp_all_mean_value %>%
 
 
     
+```
 
+```{r}
+#Loess
+
+loessmodel <- loess(mean_value ~ year, data = jmp_all_mean_value, span = 0.5, degree = 2)
+
+
+
+predict(loessmodel)
 
 ```
+
 
 
 # Plots
@@ -137,6 +147,17 @@ jmp_all_mean_value %>%
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = gam, formula =  y ~ s(x, k=3))
+```
+## Plotting using LOESS
+
+
+```{r}
+jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "KEN") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = loess, span = 0.90)
+
+
 ```
 
 
