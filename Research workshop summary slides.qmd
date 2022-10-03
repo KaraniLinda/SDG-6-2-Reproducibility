@@ -47,8 +47,11 @@ jmprsquared %>%
 jmprsquared %>% 
     filter(var_long %in% c("Sewer", "Shared") & rsq < 0.30)
 ```
+
+## Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
+
 ```{r}
-# Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
+
 
 jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
@@ -57,9 +60,59 @@ jmp_all_mean_value %>%
 
 
 ```
+# Model performance
+## Fitting different models to the data to compare performance
+
 ```{r}
-# Fitting different models to thr data to compare performance
+# Fitting a polynomial of order 4
 
 
+poly4model <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer", "Shared")) %>% 
+    nest_by(iso3, residence, var_long) %>% 
+    mutate(model = list(lm(mean_value ~ poly(year,4, raw = TRUE), data = data)))
+
+
+rsquared <- poly4model|> 
+    summarise(rsq = summary(model)$r.squared) 
+
+
+  
+```
+
+
+```{r}
+#Generalized Additive Model
+
+library(splines)
+
+splinemodel <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer", "Shared")) %>% 
+    nest_by(iso3, residence, var_long) %>% 
+    mutate(model = list(lm(mean_value ~ bs(year, knots = quantile(jmp_all_mean_value$year, p = c(0.25,0.5,0.75))), data = data)))
+
+
+rsquared <- splinemodel|> 
+    summarise(rsq = summary(model)$r.squared) 
+
+```
+
+
+
+# Plots
+## Plot using a 4th order polynomial
+
+```{r}
+jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))
+```
+
+```{r}
+jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))
 ```
 
