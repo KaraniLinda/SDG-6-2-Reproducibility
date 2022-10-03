@@ -266,7 +266,7 @@ library(splines)
 
 
 
-uga_rural_improved_spline <- lm(mean_value~bs(year,knots=c(2003,2010)), data = uga_rural_improved)
+uga_rural_improved_spline <- lm(mean_value~bs(year,knots=c(2003,2005,2007,2010)), data = uga_rural_improved)
 
 summary(uga_rural_improved_spline)
 
@@ -278,7 +278,7 @@ tidy(uga_rural_improved_spline) |>
     knitr::kable(digits = 2)
 
 glance(uga_rural_improved_spline) |> 
-        knitr::kable(digits = 2)""
+        knitr::kable(digits = 2)
 
 ```
 
@@ -301,7 +301,7 @@ library(tidyverse)
 uga_rural_improved %>% 
     ggplot(aes(x = year, y = mean_value)) +
     geom_point() +
-    geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2003,2010)),se = FALSE)+
+    geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2000,2003,2005,2007,2010)),se = FALSE)+
     geom_line(data = uga_values_spline, aes(x = year, y=pred),col="blue",lwd=1.5)
 ```
 

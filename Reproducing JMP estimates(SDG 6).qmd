@@ -16,7 +16,10 @@ library(broom)
 ```
 
 ```{r}
+
+
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+
 ```
 
 # JMP Primary indicators:
@@ -199,48 +202,25 @@ jmp_fitted <- jmp_models %>%
 
 jmp_fitted
 
-
-
-
 ```
 
 ```{r}
-#filter(year_seq_df, iso3 == "KEN", var_long == "Septic")$year
+#Join fitted values to year seq df
 
-nested_list <- list()
-
-
-
-
-for (name in unique(year_seq_df$iso3)) {
+jmpseqfitted <- jmp_fitted %>% 
+    right_join(year_seq_df)
     
-    for (var in filter(year_seq_df, iso3 == name)$var_long) {
-        
-        for (actyear in filter(year_seq_df, iso3 == name, var_long == var)$year) {
-        
-            nested_list[[name]][[var]][[actyear]] <- tibble(
-                iso3 = name,
-                var_long = var,
-                year = actyear
-            )
-         
-           
-
-         } 
-        
-    }
-    
-}
-
-nested_list        
+jmpseqfitted
 ```
+
+
 
 # Getting the primary indicators
 
 ## s1 : The proportion of population that uses improved sanitation facilities(
 
 ```{r}
-s1ols <- jmp_fitted %>% 
+s1ols <- jmpseqfitted %>% 
     filter(var_long == "Improved")
     
 
@@ -257,7 +237,7 @@ s1average
 ## s2 : The proportion of population that uses improved sanitation facilities connected to sewers
 
 ```{r}
-s2ols <- jmp_fitted %>% 
+s2ols <- jmpseqfitted %>% 
     filter(var_long == "Sewer")
     
 
@@ -267,12 +247,14 @@ s2average <- jmp_mean_estimates %>%
     filter(var_long == "Sewer")
 
 s2average
+
 ```
+
 
 ## s3 : The proportion of population that uses improved sanitation facilities connected to septic tanks
 
 ```{r}
-s3ols <- jmp_fitted %>% 
+s3ols <- jmpseqfitted %>% 
     filter(var_long == "Septic")
     
 
@@ -287,7 +269,7 @@ s3average
 ## s6: The proportion of population that uses no sanitation facilities(open defecation)
 
 ```{r}
-s6ols <- jmp_fitted %>% 
+s6ols <- jmpseqfitted %>% 
     filter(var_long == "Open defecation")
     
 
