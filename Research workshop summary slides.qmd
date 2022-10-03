@@ -1,0 +1,65 @@
+---
+title: "Research workshop summary slides"
+format: pptx
+editor: visual
+---
+
+# DATA SCIENCE WORKSHOP
+
+## SDG 6.2 Reproducibility
+
+## Outline
+
+Overall vision (raw data, estimates code, jmp estimates package)
+
+Raw data package documentation (proof-of-concept website)
+
+-   Statistics of the raw data
+
+Master Thesis Project
+
+-   Input: Data Package
+-   Status
+-   Learning
+-   Next steps
+-   Gaps
+-   What has worked? What hasn't?
+-   Plots exploring the statistics
+-   Recommendations
+
+```{r}
+#| child: "Reproducing JMP estimates(SDG 6).qmd"
+
+```
+
+
+```{r}
+#Plotting R squared
+
+jmprsquared %>% 
+    ggplot(aes(x = var_long, y = rsq)) + geom_boxplot(fill = "pink") + facet_wrap(~residence)
+    
+    
+
+
+```
+```{r}
+jmprsquared %>% 
+    filter(var_long %in% c("Sewer", "Shared") & rsq < 0.30)
+```
+```{r}
+# Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
+
+jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)
+    
+
+
+```
+```{r}
+# Fitting different models to thr data to compare performance
+
+
+```
+
