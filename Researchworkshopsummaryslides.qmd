@@ -2,16 +2,18 @@
 title: "Research workshop summary slides"
 format: 
    revealjs:
+       transition: slide
+       background-transition: fade
        css: ["theme/theme.css"]
-       theme: simple
+       theme: moon
        echo: false
 ---
 
 # DATA SCIENCE WORKSHOP
 
-## SDG 6.2 Reproducibility
+# SDG 6.2 Reproducibility
 
-## Outline
+## Outline {.smaller}
 
 Overall vision (raw data, estimates code, jmp estimates package)
 
@@ -23,12 +25,12 @@ Master Thesis Project
 
 -   Input: Data Package
 -   Status
--   Learning
--   Next steps
--   Gaps
 -   What has worked? What hasn't?
 -   Plots exploring the statistics
 -   Recommendations
+-   Gaps
+-   Learning
+-   Next steps
 
 ```{r}
 #Loading necessary libraries
@@ -47,14 +49,88 @@ jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
 ```
 
-```{r shared-code}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 
-source(here::here("Reproducing JMP estimates(SDG 6).qmd"))
+jmp_urban_rural <- jmpraw %>%  
+    filter(residence != "national") %>% 
+    filter(var_long %in% c("Open defecation", "Improved", "Shared", "Septic" , "Sewer"))
+
+jmp_urban_rural
+
+jmp_all_mean_value <- jmp_urban_rural |> 
+    group_by(iso3, residence, var_long, year) |> 
+    summarise(mean_value = mean(value)) %>% 
+    ungroup()
+
+
+jmp_all_mean_value
+
+min_max_year_iso3 <- jmp_all_mean_value |> 
+    group_by(iso3, var_long) |> 
+    summarise(
+        min = min(year),
+        max = max(year)
+    ) 
+
+diff_smaller_five_year_vec <- min_max_year_iso3 |> 
+    mutate(diff = max - min) |> 
+    filter(diff < 5) |>
+    pull(iso3) 
+
+
+diff_greater_four_year_vec <- min_max_year_iso3 |> 
+    mutate(diff = max - min) |> 
+    filter(diff >= 5) |>
+    pull(iso3)
+
+options(scipen=999, digits = 2)
+
+jmp_models <- jmp_all_mean_value %>% 
+    filter(iso3 %in% diff_greater_four_year_vec) |> 
+    nest_by(iso3, residence, var_long) %>% 
+    mutate(model = list(lm(mean_value ~ year, data = data)))
+
+jmprsquared <- jmp_models |> 
+    summarise(rsq = summary(model)$r.squared) 
+
+
+jmp_models |> 
+    summarise(broom::glance(model))
+
+jmp_models |> 
+    summarise(broom::tidy(model))
+
+
+
+
 
 ```
 
 
-```{r}
+## Masters thesis progress
+
+::: {.incremental}
+
+Objectives
+
+- Generate sanitation estimates from raw packaged data using documented methods
+- Fit different statistical models to assess goodness of fit
+
+Status
+
+- Managed to derive estimates for the primary indicators
+
+:::
+
+# Reproducibility : Comparing our results to JMP estimates
+
+- Show plots comparing estimates
+
+# Model Fit
+
+## Plotting the distribution of r squared
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 #Plotting R squared
 
@@ -65,21 +141,46 @@ jmprsquared %>%
 
 ```
 
-```{r}
-jmprsquared %>% 
-    filter(var_long %in% c("Sewer", "Shared") & rsq < 0.30)
+```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
+
+jmpfilter <- jmprsquared %>% 
+    filter(var_long %in% c("Sewer", "Shared", "Improved") & rsq < 0.35)
+
+jmpfilter
+
 ```
+# Case study : Plot fit of different countries
 
 ## Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
 
-```{r}
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
+library(gridExtra)
 
-jmp_all_mean_value %>% 
+plot1 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
-    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)
-    
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "AFG Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
 
+
+plot2 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+grid.arrange(plot1, plot2)
 
 ```
 
@@ -87,12 +188,12 @@ jmp_all_mean_value %>%
 
 ## Fitting different models to the data to compare performance
 
-```{r}
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Fitting a polynomial of order 4
 
 
 poly4model <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared")) %>% 
+    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
     nest_by(iso3, residence, var_long) %>% 
     mutate(model = list(lm(mean_value ~ poly(year,4, raw = TRUE), data = data)))
 
@@ -104,13 +205,13 @@ rsquared <- poly4model|>
   
 ```
 
-```{r}
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 #Splines
 
 library(splines)
 
 splinemodel <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared")) %>% 
+    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
     nest_by(iso3, residence, var_long) %>% 
     mutate(model = list(lm(mean_value ~ bs(year, knots = quantile(jmp_all_mean_value$year, p = c(0.25,0.5,0.75))), data = data)))
 
@@ -120,20 +221,20 @@ rsquared <- splinemodel|>
 
 ```
 
-```{r}
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Generalized Additive Model
 
 library(mgcv)
 
 GAMmodel <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared")) %>% 
+    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
     mutate(model = list(gam(mean_value ~ s(year) , data = .)))
 
 
     
 ```
 
-```{r}
+```{r , warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
 #Loess
 
 loessmodel <- loess(mean_value ~ year, data = jmp_all_mean_value, span = 0.5, degree = 2)
@@ -148,38 +249,130 @@ predict(loessmodel)
 
 ## Plot using a 4th order polynomial
 
-```{r}
-jmp_all_mean_value %>% 
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+plot3 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))
+    stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "AFG Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+plot4 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+grid.arrange(plot3,plot4)
+
 ```
 
 ## Plot using splines
 
-```{r}
-jmp_all_mean_value %>% 
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+plot5 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))
+    stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "AFG Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+plot6 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+grid.arrange(plot5,plot6)
+
+
 ```
 
 ## Plot using GAM
 
-```{r}
-jmp_all_mean_value %>% 
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+plot7 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = gam, formula =  y ~ s(x, k=3))
+    stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "AFG Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+
+plot8 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+
+grid.arrange(plot7,plot8)
 ```
 
 ## Plotting using LOESS
 
-```{r}
-jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer") & iso3 == "KEN") %>%
-    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = loess, span = 0.90)
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
+plot9 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = loess, span = 0.90)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "AFG Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+plot10 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
+    stat_smooth(method = loess, span = 0.90)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+grid.arrange(plot9,plot10)
 
 ```
