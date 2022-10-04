@@ -32,6 +32,7 @@ Master Thesis Project
 
 ```{r}
 #Loading necessary libraries
+
 library(tidyverse)
 library(modelr)
 library(broom)
@@ -46,8 +47,14 @@ jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
 ```
 
+```{r shared-code}
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd", include=FALSE}
+source(here::here("Reproducing JMP estimates(SDG 6).qmd"))
+
+```
+
+
+```{r}
 
 #Plotting R squared
 
@@ -58,14 +65,14 @@ jmprsquared %>%
 
 ```
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 jmprsquared %>% 
     filter(var_long %in% c("Sewer", "Shared") & rsq < 0.30)
 ```
 
 ## Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 
 
 jmp_all_mean_value %>% 
@@ -80,7 +87,7 @@ jmp_all_mean_value %>%
 
 ## Fitting different models to the data to compare performance
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 # Fitting a polynomial of order 4
 
 
@@ -97,7 +104,7 @@ rsquared <- poly4model|>
   
 ```
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 #Splines
 
 library(splines)
@@ -113,7 +120,7 @@ rsquared <- splinemodel|>
 
 ```
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 # Generalized Additive Model
 
 library(mgcv)
@@ -126,7 +133,7 @@ GAMmodel <- jmp_all_mean_value %>%
     
 ```
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 #Loess
 
 loessmodel <- loess(mean_value ~ year, data = jmp_all_mean_value, span = 0.5, degree = 2)
@@ -141,7 +148,7 @@ predict(loessmodel)
 
 ## Plot using a 4th order polynomial
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -150,7 +157,7 @@ jmp_all_mean_value %>%
 
 ## Plot using splines
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -159,7 +166,7 @@ jmp_all_mean_value %>%
 
 ## Plot using GAM
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -168,7 +175,7 @@ jmp_all_mean_value %>%
 
 ## Plotting using LOESS
 
-```{r child = "Reproducing JMP estimates(SDG 6).qmd"}
+```{r}
 jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "KEN") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
