@@ -6,7 +6,7 @@ execute:
   echo: true
   warning: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -34,25 +34,11 @@ s6: The proportion of population that uses no sanitation facilities(open defecat
 
 Improved refers only to the type of facility used irrespective of whether the facilities are shared by more than one household
 
-```{r}
-glimpse(jmpraw)
-
-jmpraw %>% 
-    count(san_service_chain, var_long, var_short) %>% 
-        View()
-
-jmpraw %>% 
-    count(var_long, san_service_chain) %>% 
-    filter(san_service_chain == "user interface") %>% 
-    filter(var_long == "Improved")
-```
 
 ```{r}
 jmp_urban_rural <- jmpraw %>%  
     filter(residence != "national") %>% 
     filter(var_long %in% c("Open defecation", "Improved", "Shared", "Septic" , "Sewer"))
-
-jmp_urban_rural
 
 # basic services (improved, but not shared)
 # limited services (improved, but shared)
@@ -62,9 +48,6 @@ jmp_urban_rural
 
 ```
 
-```{r}
-distinct(jmpraw, var_long, san_service_chain)
-```
 
 ```{r}
 # summarise data by year
@@ -73,9 +56,6 @@ jmp_all_mean_value <- jmp_urban_rural |>
     group_by(iso3, residence, var_long, year) |> 
     summarise(mean_value = mean(value)) %>% 
     ungroup()
-
-
-jmp_all_mean_value
 ```
 
 ```{r}
@@ -99,10 +79,6 @@ diff_greater_four_year_vec <- min_max_year_iso3 |>
     filter(diff >= 5) |>
     pull(iso3)
 
-
-min_max_year_iso3
-diff_smaller_five_year_vec
-diff_greater_four_year_vec
 ```
 
 ```{r}
@@ -139,14 +115,9 @@ iso3_var_long_list[[name]] <- nested_list[[name]] %>%
     
 }
 
-
 year_seq_df <- iso3_var_long_list %>% 
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
-
-year_seq_df
-
-
 
 ```
 
@@ -160,8 +131,6 @@ jmp_mean_estimates <- jmp_all_mean_value %>%
     summarise(average_estimate = mean(mean_value)) |> 
     left_join(year_seq_df)
 
-jmp_mean_estimates
-
 ```
 
 # All OLS Model estimates
@@ -174,16 +143,23 @@ jmp_models <- jmp_all_mean_value %>%
     nest_by(iso3, residence, var_long) %>% 
     mutate(model = list(lm(mean_value ~ year, data = data)))
 
+# jmp_models |> 
+#     summarise(rsq = summary(model)$r.squared)
+# 
+# jmp_models |> 
+#     summarise(broom::glance(model)) 
+
+
 jmp_models |> 
-    summarise(rsq = summary(model)$r.squared)
+     summarise(broom::tidy(model)) 
+
+
+jmp_models %>% 
+    write_rds(file = "data/derived/jmp_primary_indicator_models.rds")
 
 jmp_models |> 
-    summarise(broom::glance(model))
-
-jmp_models |> 
-    summarise(broom::tidy(model))
-
-
+    summarise(broom::glance(model)) %>% 
+    write_csv(file = "data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv")
 
 ```
 
@@ -193,27 +169,29 @@ jmp_models |>
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
 
-df2 <- year_seq_df %>% 
-    pull(iso3,year)
-
 jmp_fitted <- jmp_models %>% 
     summarise(augment(model, newdata = dat_year))
    
 
-jmp_fitted
-
 ```
 
 ```{r}
-#Join fitted values to year seq df
 
-jmpseqfitted <- jmp_fitted %>% 
+# Join fitted values to year seq df
+
+jmp_seq_fitted <- jmp_fitted %>% 
     right_join(year_seq_df)
+
+jmp_mean_estimates %>% 
+    relocate(year, .after = var_long) %>% 
+    rename(estimate = average_estimate) %>% 
+    bind_rows(
+        jmp_seq_fitted %>% 
+            rename(estimate = .fitted)
+    ) %>% 
+    write_csv("data/derived/jmp_primary_indicator_estimates.csv")
     
-jmpseqfitted
 ```
-
-
 
 # Getting the primary indicators
 
@@ -280,3 +258,86 @@ s6average <- jmp_mean_estimates %>%
 
 s6average
 ```
+
+# Notes 
+
+- for which residence are estimates on open defecation, septic tanks, and sewers? The data shows NA
+- supporting text for the code that is written in this document (less priority)
+- the estimates are not yet compared to JMP estimates
+- estimates for national residence are not available
+- have you worked on visualisations for statistics outputs?
+
+## Data vis
+
+### p-values (improved/shared, urban/rural)
+
+```{r}
+jmp_model_coefficients <- jmp_models |> 
+    summarise(broom::glance(model)) 
+```
+
+
+```{r}
+
+jmp_model_coefficients %>% 
+    ggplot(aes(x = iso3, y = p.value)) +
+    geom_point() +
+    coord_flip() +
+    facet_grid(residence ~ var_long) 
+
+```
+
+```{r}
+
+jmp_model_coefficients %>% 
+    ggplot(aes(x = residence, y = p.value, color = residence)) +
+    geom_violin() + 
+    geom_jitter(width = 0.05) +
+    facet_wrap(~var_long) +
+    theme(legend.position = "none")
+```
+
+```{r}
+
+jmp_model_coefficients %>% 
+    ggplot(aes(x = p.value)) +
+    geom_histogram()
+
+jmp_model_coefficients
+
+
+```
+
+
+### r.squared
+
+```{r}
+
+jmp_model_coefficients %>% 
+    ggplot(aes(x = iso3, y = r.squared)) +
+    geom_point() +
+    coord_flip() +
+    facet_grid(residence ~ var_long) 
+
+```
+
+```{r}
+
+jmp_model_coefficients %>% 
+    ggplot(aes(x = residence, y = r.squared, color = residence)) +
+    geom_violin() + 
+    geom_jitter(width = 0.05) +
+    facet_wrap(~var_long) +
+    labs(title = "Model coefficients",
+         subtitle = "r.squared") +
+    theme(legend.position = "none")
+
+```
+
+```{r}
+
+
+
+```
+
+
