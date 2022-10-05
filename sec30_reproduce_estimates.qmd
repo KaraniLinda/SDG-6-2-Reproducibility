@@ -196,7 +196,7 @@ jmp_mean_estimates %>%
 ## s1 : The proportion of population that uses improved sanitation facilities(
 
 ```{r}
-s1ols <- jmpseqfitted %>% 
+s1ols <- jmp_seq_fitted %>% 
     filter(var_long == "Improved")
 
 
@@ -213,7 +213,7 @@ s1average
 ## s2 : The proportion of population that uses improved sanitation facilities connected to sewers
 
 ```{r}
-s2ols <- jmpseqfitted %>% 
+s2ols <- jmp_seq_fitted %>% 
     filter(var_long == "Sewer")
 
 
@@ -230,7 +230,7 @@ s2average
 ## s3 : The proportion of population that uses improved sanitation facilities connected to septic tanks
 
 ```{r}
-s3ols <- jmpseqfitted %>% 
+s3ols <- jmp_seq_fitted %>% 
     filter(var_long == "Septic")
 
 
@@ -245,7 +245,7 @@ s3average
 ## s6: The proportion of population that uses no sanitation facilities(open defecation)
 
 ```{r}
-s6ols <- jmpseqfitted %>% 
+s6ols <- jmp_seq_fitted %>% 
     filter(var_long == "Open defecation")
 
 
@@ -259,84 +259,10 @@ s6average
 
 # Notes 
 
-- for which residence are estimates on open defecation, septic tanks, and sewers? The data shows NA
 - supporting text for the code that is written in this document (less priority)
 - the estimates are not yet compared to JMP estimates (high priority)
-- estimates for national residence are not available
+- estimates for national residence are not available (medium priority)
+- but, check how national is derived from urban and rural
 - have you worked on visualisations for statistics outputs?
-- check how national is derived from urban and rural
-
-## Data vis
-
-### p-values (improved/shared, urban/rural)
-
-```{r}
-jmp_model_coefficients <- jmp_models |> 
-    summarise(broom::glance(model)) 
-```
-
-
-```{r}
-
-jmp_model_coefficients %>% 
-    ggplot(aes(x = iso3, y = p.value)) +
-    geom_point() +
-    coord_flip() +
-    facet_grid(residence ~ var_long) 
-
-```
-
-```{r}
-
-jmp_model_coefficients %>% 
-    ggplot(aes(x = residence, y = p.value, color = residence)) +
-    geom_violin() + 
-    geom_jitter(width = 0.05) +
-    facet_wrap(~var_long) +
-    theme(legend.position = "none")
-```
-
-```{r}
-
-jmp_model_coefficients %>% 
-    ggplot(aes(x = p.value)) +
-    geom_histogram()
-
-jmp_model_coefficients
-
-
-```
-
-
-### r.squared
-
-```{r}
-
-jmp_model_coefficients %>% 
-    ggplot(aes(x = iso3, y = r.squared)) +
-    geom_point() +
-    coord_flip() +
-    facet_grid(residence ~ var_long) 
-
-```
-
-```{r}
-
-jmp_model_coefficients %>% 
-    ggplot(aes(x = residence, y = r.squared, color = residence)) +
-    geom_violin() + 
-    geom_jitter(width = 0.05) +
-    facet_wrap(~var_long) +
-    labs(title = "Model coefficients",
-         subtitle = "r.squared") +
-    theme(legend.position = "none")
-
-```
-
-```{r}
-
-
-
-```
-
+- 
 

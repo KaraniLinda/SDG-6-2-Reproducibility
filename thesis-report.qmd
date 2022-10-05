@@ -22,8 +22,13 @@ library(tidyverse)
 
 ```{r}
 #| child: "sections/03-model-fit-decision-tree.qmd"
-#| 
 ```
+
+```{r}
+#| child: "sections/03-02-results-model-fit.qmd"
+```
+
+
 
 Write some text [@fuller2016tracking]
 
