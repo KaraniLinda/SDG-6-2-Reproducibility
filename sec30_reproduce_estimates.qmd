@@ -109,9 +109,9 @@ for (name in unique(min_max_year_iso3$iso3)) {
 iso3_var_long_list <- list()
 
 for (name in unique(min_max_year_iso3$iso3)) {
-
-iso3_var_long_list[[name]] <- nested_list[[name]] %>% 
-    bind_rows()
+    
+    iso3_var_long_list[[name]] <- nested_list[[name]] %>% 
+        bind_rows()
     
 }
 
@@ -151,11 +151,9 @@ jmp_models <- jmp_all_mean_value %>%
 
 
 jmp_models |> 
-     summarise(broom::tidy(model)) 
+    summarise(broom::tidy(model)) %>% 
+    write_csv(file = "data/derived/jmp_primary_indicator_estimates_model_coefficients.csv")
 
-
-jmp_models %>% 
-    write_rds(file = "data/derived/jmp_primary_indicator_models.rds")
 
 jmp_models |> 
     summarise(broom::glance(model)) %>% 
@@ -171,7 +169,7 @@ dat_year <- tibble(year = seq(2000, 2020, 1))
 
 jmp_fitted <- jmp_models %>% 
     summarise(augment(model, newdata = dat_year))
-   
+
 
 ```
 
@@ -190,7 +188,7 @@ jmp_mean_estimates %>%
             rename(estimate = .fitted)
     ) %>% 
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
-    
+
 ```
 
 # Getting the primary indicators
@@ -200,7 +198,7 @@ jmp_mean_estimates %>%
 ```{r}
 s1ols <- jmpseqfitted %>% 
     filter(var_long == "Improved")
-    
+
 
 s1ols
 
@@ -208,7 +206,7 @@ s1average <- jmp_mean_estimates %>%
     filter(var_long == "Improved")
 
 s1average
-    
+
 
 ```
 
@@ -217,7 +215,7 @@ s1average
 ```{r}
 s2ols <- jmpseqfitted %>% 
     filter(var_long == "Sewer")
-    
+
 
 s2ols
 
@@ -234,7 +232,7 @@ s2average
 ```{r}
 s3ols <- jmpseqfitted %>% 
     filter(var_long == "Septic")
-    
+
 
 s3ols
 
@@ -249,7 +247,7 @@ s3average
 ```{r}
 s6ols <- jmpseqfitted %>% 
     filter(var_long == "Open defecation")
-    
+
 
 s6ols
 
@@ -263,9 +261,10 @@ s6average
 
 - for which residence are estimates on open defecation, septic tanks, and sewers? The data shows NA
 - supporting text for the code that is written in this document (less priority)
-- the estimates are not yet compared to JMP estimates
+- the estimates are not yet compared to JMP estimates (high priority)
 - estimates for national residence are not available
 - have you worked on visualisations for statistics outputs?
+- check how national is derived from urban and rural
 
 ## Data vis
 
