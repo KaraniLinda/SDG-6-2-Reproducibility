@@ -1,0 +1,84 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+```
+
+# p-values (improved/shared, urban/rural)
+
+```{r}
+jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
+
+```
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = iso3, y = p.value)) +
+    geom_point() +
+    coord_flip() +
+    facet_grid(residence ~ var_long) 
+
+```
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = residence, y = p.value, color = residence)) +
+    geom_violin() + 
+    geom_jitter(width = 0.05) +
+    facet_wrap(~var_long) +
+    theme(legend.position = "none")
+```
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = p.value)) +
+    geom_histogram(binwidth = 0.01) +
+    geom_vline(xintercept = 0.05)
+
+```
+
+# r.squared
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = iso3, y = r.squared)) +
+    geom_point() +
+    coord_flip() +
+    facet_grid(residence ~ var_long) 
+
+```
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = residence, y = r.squared, color = residence)) +
+    geom_violin() + 
+    geom_jitter(width = 0.05) +
+    facet_wrap(~var_long) +
+    labs(title = "Model coefficients",
+         subtitle = "r.squared") +
+    theme(legend.position = "none")
+
+```
+
+```{r}
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = r.squared)) +
+    geom_histogram(binwidth = 0.01) +
+    facet_grid(residence~var_long) 
+
+```
+
+
+
