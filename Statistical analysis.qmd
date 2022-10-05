@@ -180,7 +180,7 @@ par(mfrow = c(2, 2))
 plot(uga_rural_improved_lm_fit)
 ```
 
-The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line.
+The first graph plots the relationship between the residuals and fitted values. A linear relationship is demonstrate by a horizontal red line. From the plot we see a strong pattern in the residuals which indicates non linearity of our data
 
 The scale- location plot analyzes the homogeneity of the variance. We are also looking for a horizontal red line in this case.In this dataset, there is some evidence of homogeneity with points being equally far from the regression line across the observations. #The QQ plot above helps to assess the normality of residuals. Normally distributed residuals will fall along the grey dotted line as is our case above except for a few outliers
 
@@ -266,7 +266,7 @@ library(splines)
 
 
 
-uga_rural_improved_spline <- lm(mean_value~bs(year,knots=c(2003,2010)), data = uga_rural_improved)
+uga_rural_improved_spline <- lm(mean_value~bs(year,knots=c(2003,2005,2007,2010)), data = uga_rural_improved)
 
 summary(uga_rural_improved_spline)
 
@@ -278,7 +278,7 @@ tidy(uga_rural_improved_spline) |>
     knitr::kable(digits = 2)
 
 glance(uga_rural_improved_spline) |> 
-        knitr::kable(digits = 2)""
+        knitr::kable(digits = 2)
 
 ```
 
@@ -301,7 +301,7 @@ library(tidyverse)
 uga_rural_improved %>% 
     ggplot(aes(x = year, y = mean_value)) +
     geom_point() +
-    geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2003,2010)),se = FALSE)+
+    geom_smooth(method = "lm",formula = mean_value~bs(year,knots=c(2000,2003,2005,2007,2010)),se = FALSE)+
     geom_line(data = uga_values_spline, aes(x = year, y=pred),col="blue",lwd=1.5)
 ```
 
@@ -311,7 +311,32 @@ uga_rural_improved %>%
     geom_point() +
     geom_smooth(method = "gam", se = FALSE)
 ```
+# Fitting several LOESS regression models tp dataset
 
+```{r}
+
+
+
+uga_rural_improved_loess <- loess(mean_value~ year, data = uga_rural_improved, span = .5)
+
+summary(uga_rural_improved_loess)
+
+uga_rural_improved_smooth <- predict(uga_rural_improved_loess)
+    
+uga_rural_improved_smooth
+```
+
+```{r}
+##Visualizing loess
+
+uga_rural_improved %>% 
+    ggplot(aes(year,mean_value))+
+    geom_point()+
+      geom_smooth(method = "loess", span=0.5,
+              method.args = list(degree = 2))
+    
+    
+```
 
 
 # Model predictions all countries
