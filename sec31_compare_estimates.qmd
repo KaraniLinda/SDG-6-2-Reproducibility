@@ -1,0 +1,39 @@
+---
+title: "Untitled"
+format: html
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+
+# Data Import
+
+```{r}
+jmp_estimates_derived <- read_csv("data/derived/jmp_primary_indicator_estimates.csv")
+
+jmp_estimates_original <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/jmp-washdata-indicators.csv")
+
+```
+
+# Data manipulation
+
+```{r}
+
+jmp_estimates_derived
+
+jmp_estimates_original %>% 
+    filter(service == "sanitation") %>% 
+    select(iso3, residence, var_short,  indicator, year, estimate = percent) %>% 
+    count(var_short, indicator) %>% 
+    print(n = 22)
+
+
+
+```
+
