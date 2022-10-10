@@ -34,7 +34,6 @@ s6: The proportion of population that uses no sanitation facilities(open defecat
 
 Improved refers only to the type of facility used irrespective of whether the facilities are shared by more than one household
 
-
 ```{r}
 jmp_urban_rural <- jmpraw %>%  
     filter(residence != "national") %>% 
@@ -47,7 +46,6 @@ jmp_urban_rural <- jmpraw %>%
 
 
 ```
-
 
 ```{r}
 # summarise data by year
@@ -226,7 +224,6 @@ s2average
 
 ```
 
-
 ## s3 : The proportion of population that uses improved sanitation facilities connected to septic tanks
 
 ```{r}
@@ -257,12 +254,11 @@ s6average <- jmp_mean_estimates %>%
 s6average
 ```
 
-# Notes 
+# Notes
 
-- supporting text for the code that is written in this document (less priority)
-- the estimates are not yet compared to JMP estimates (high priority)
-- estimates for national residence are not available (medium priority)
-- but, check how national is derived from urban and rural
-- have you worked on visualisations for statistics outputs?
-- 
-
+-   supporting text for the code that is written in this document (less priority)
+-   the estimates are not yet compared to JMP estimates (high priority)
+-   estimates for national residence are not available (medium priority)
+-   but, check how national is derived from urban and rural
+-   have you worked on visualisations for statistics outputs?
+-   
