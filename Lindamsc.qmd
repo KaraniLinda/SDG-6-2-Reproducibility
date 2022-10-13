@@ -317,7 +317,7 @@ uga_rural_improved %>%
 
 ```{r}
 
-# Support from: https://stackoverflow.com/a/63774042/6816220
+# Support from: https://stackoverflow.com/a/63774042/6816220 
 
 # Filter data for urban, rural, improved and shared
 
