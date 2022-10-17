@@ -61,9 +61,9 @@ jmp_measures_of_model_fit %>%
 
 ```{r}
 jmp_measures_of_model_fit %>% 
-    ggplot(aes(x = p.value)) +
-    geom_histogram(binwidth = 0.01) +
-    geom_vline(xintercept = 0.05)
+    ggplot(aes(x = r.squared)) +
+    geom_histogram(binwidth = 0.10) +
+    geom_vline(xintercept = 0.30)
 ```
 
 ```{r}
