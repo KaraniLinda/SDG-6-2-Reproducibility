@@ -3,7 +3,7 @@ title: "Research workshop summary slides"
 format: 
    revealjs:
        transition: slide
-       background-transition: fade
+       background-transition: zoom
        css: ["theme/theme.css"]
        theme: moon
        echo: false
@@ -13,7 +13,7 @@ format:
 
 # SDG 6.2 Reproducibility
 
-## Outline {.smaller}
+## Agenda {.smaller}
 
 Overall vision (raw data, estimates code, jmp estimates package)
 
@@ -42,11 +42,13 @@ library(broom)
 ```
 
 
-```{r}
+```{r, include=FALSE, message=FALSE, warning=FALSE }
 #Getting data
 
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
 
+jmp_measures_of_model_fit
 ```
 
 ```{r, include=FALSE, message=FALSE, warning=FALSE}
@@ -107,6 +109,23 @@ jmp_models |>
 ```
 
 
+## Project outline
+
+Introduction
+
+Methods
+
+Results
+
+- Linear regression: Comparison of primary estimates with JMP Estimates
+- Measures of goodness of fit: How well does the model fit the data for different countries?(R squared, pvalue)
+- Alternative models: Moving beyond linearity
+
+Discussion
+
+Conclusion and recommendations
+
+
 ## Masters thesis progress
 
 ::: {.incremental}
@@ -126,20 +145,43 @@ Status
 
 - Show plots comparing estimates
 
-# Model Fit
+# Plotting Model coefficients
 
-## Plotting the distribution of r squared
+## Model fit : R squared {auto-animate=true auto-animate-easing="ease-in-out"}
 
+::: {.r-stack}
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
-#Plotting R squared
 
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = var_long, y = r.squared)) + geom_boxplot(fill = "pink") +
+    facet_wrap(~residence)+
+    labs(title = "Model coefficients",
+         subtitle = "r.squared")
 
-jmprsquared %>% 
-    ggplot(aes(x = var_long, y = rsq)) + geom_boxplot(fill = "pink") + facet_wrap(~residence)
-    
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = r.squared)) +
+    geom_histogram(binwidth = 0.10) +
+    geom_vline(xintercept = 0.30)
 
 ```
+:::
+
+## Model fit : P value {auto-animate="true" auto-animate-easing="ease-in-out" }
+
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = var_long, y = p.value)) + geom_boxplot(fill = "pink") +           
+    facet_wrap(~residence)+
+    labs(title = "Model coefficients",
+         subtitle = "pvalue")
+
+    
+```
+
+
+
 
 ```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
 
@@ -149,9 +191,10 @@ jmpfilter <- jmprsquared %>%
 jmpfilter
 
 ```
-# Case study : Plot fit of different countries
 
-## Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared
+# Plot linear fit of different countries: Shared/Sewer
+
+## OLS Regression : r squared < 0.30
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -184,9 +227,11 @@ grid.arrange(plot1, plot2)
 
 ```
 
-# Model performance
+# Alternative models
 
-## Fitting different models to the data to compare performance
+- Fitting different models to the data to compare goodness of fit
+
+
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Fitting a polynomial of order 4
@@ -225,29 +270,47 @@ rsquared <- splinemodel|>
 # Generalized Additive Model
 
 library(mgcv)
+library(kableExtra)
+library(gratia)
 
 GAMmodel <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
-    mutate(model = list(gam(mean_value ~ s(year) , data = .)))
+    group_by(iso3, residence, var_long) %>% 
+    gam(mean_value ~ s(year, bs = "cs") , data = .)
 
 
     
+summary(GAMmodel)
+
+tidy(GAMmodel) %>% kable()
+    
+```
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+jmp_all_mean_value %>% add_residuals(GAMmodel) %>% add_fitted(GAMmodel) %>% kable() %>%  scroll_box(height = "200px")
 ```
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
 #Loess
 
-loessmodel <- loess(mean_value ~ year, data = jmp_all_mean_value, span = 0.5, degree = 2)
 
 
 
-predict(loessmodel)
+loessmodel <- jmp_all_mean_value %>% 
+    group_by(iso3, residence, var_long) %>%
+    loess(mean_value ~ year, data = ., span = 0.5, degree = 2)
+
+summary(loessmodel)
+
+augment(loessmodel, se_fit = TRUE) %>% kable() %>%  scroll_box(height = "200px")
 
 ```
 
 # Plots
 
 ## Plot using a 4th order polynomial
+
+:::: {.columns}
+::: {.column width="80%"}
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -279,7 +342,21 @@ grid.arrange(plot3,plot4)
 
 ```
 
+:::
+
+::: {.column width="20%"}
+
+- Simple approach to model non-linear relationships
+- It adds polynomial terms or quadratic terms(square,cubes etc) to a regression
+
+:::
+
+::::
+
 ## Plot using splines
+
+:::: {.columns}
+::: {.column width="80%"}
 
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -312,7 +389,21 @@ grid.arrange(plot5,plot6)
 
 ```
 
+:::
+
+::: {.column width="20%"}
+
+- Fits a smooth curve with a series of polynomial segments
+- The values delimiting the spline segments are called knots
+
+:::
+
+::::
+
 ## Plot using GAM
+
+:::: {.columns}
+::: {.column width="80%"}
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -345,7 +436,22 @@ plot8 <- jmp_all_mean_value %>%
 grid.arrange(plot7,plot8)
 ```
 
+:::
+
+::: {.column width="20%"}
+
+- Fits spline models with automated selection of knots
+
+
+:::
+
+::::
+
+
 ## Plotting using LOESS
+
+:::: {.columns}
+::: {.column width="80%"}
 
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -376,3 +482,14 @@ plot10 <- jmp_all_mean_value %>%
 grid.arrange(plot9,plot10)
 
 ```
+
+:::
+
+::: {.column width="20%"}
+
+- Also a smoothing technique but tends to be slow on large datasets
+
+
+:::
+
+::::

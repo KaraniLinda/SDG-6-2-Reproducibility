@@ -332,8 +332,8 @@
 <h1>SDG 6.2 Reproducibility</h1>
 
 </section>
-<section id="outline" class="slide level2 smaller">
-<h2>Outline</h2>
+<section id="agenda" class="slide level2 smaller">
+<h2>Agenda</h2>
 <p>Overall vision (raw data, estimates code, jmp estimates package)</p>
 <p>Raw data package documentation (proof-of-concept website)</p>
 <ul>
@@ -353,9 +353,19 @@
 <div class="cell">
 
 </div>
-<div class="cell">
-
-</div>
+</section>
+<section id="project-outline" class="slide level2">
+<h2>Project outline</h2>
+<p>Introduction</p>
+<p>Methods</p>
+<p>Results</p>
+<ul>
+<li>Linear regression: Comparison of primary estimates with JMP Estimates</li>
+<li>Measures of goodness of fit: How well does the model fit the data for different countries?(R squared, pvalue)</li>
+<li>Alternative models: Moving beyond linearity</li>
+</ul>
+<p>Discussion</p>
+<p>Conclusion and recommendations</p>
 </section>
 <section id="masters-thesis-progress" class="slide level2">
 <h2>Masters thesis progress</h2>
@@ -379,30 +389,34 @@
 </section>
 
 <section>
-<section id="model-fit" class="title-slide slide level1 center">
-<h1>Model Fit</h1>
+<section id="plotting-model-coefficients" class="title-slide slide level1 center">
+<h1>Plotting Model coefficients</h1>
 
 </section>
-<section id="plotting-the-distribution-of-r-squared" class="slide level2">
-<h2>Plotting the distribution of r squared</h2>
+<section id="model-fit-r-squared" class="slide level2" data-auto-animate="true" data-auto-animate-easing="ease-in-out">
+<h2 data-id="quarto-animate-title">Model fit : R squared</h2>
 
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section></section>
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section>
+<section id="model-fit-p-value" class="slide level2" data-auto-animate="true" data-auto-animate-easing="ease-in-out">
+<h2 data-id="quarto-animate-title">Model fit : P value</h2>
+
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch"></section></section>
 <section>
-<section id="case-study-plot-fit-of-different-countries" class="title-slide slide level1 center">
-<h1>Case study : Plot fit of different countries</h1>
+<section id="plot-linear-fit-of-different-countries-sharedsewer" class="title-slide slide level1 center">
+<h1>Plot linear fit of different countries: Shared/Sewer</h1>
 
 </section>
-<section id="plotting-coverage-for-countries-with-a-low-rsquared-for-var_long-equal-to-sewershared" class="slide level2">
-<h2>Plotting coverage for countries with a low rsquared for var_long equal to sewer/shared</h2>
+<section id="ols-regression-r-squared-0.30" class="slide level2">
+<h2>OLS Regression : r squared &lt; 0.30</h2>
 
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section></section>
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch"></section></section>
 <section>
-<section id="model-performance" class="title-slide slide level1 center">
-<h1>Model performance</h1>
+<section id="alternative-models" class="title-slide slide level1 center">
+<h1>Alternative models</h1>
 
 </section>
-<section id="fitting-different-models-to-the-data-to-compare-performance" class="slide level2">
-<h2>Fitting different models to the data to compare performance</h2>
+<section id="fitting-different-models-to-the-data-to-compare-goodness-of-fit" class="slide level2">
+<h2>Fitting different models to the data to compare goodness of fit</h2>
 <div class="cell">
 
 </div>
@@ -420,20 +434,70 @@
 </section>
 <section id="plot-using-a-4th-order-polynomial" class="slide level2">
 <h2>Plot using a 4th order polynomial</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"></section>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-12-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Simple approach to model non-linear relationships</li>
+<li>It adds polynomial terms or quadratic terms(square,cubes etc) to a regression</li>
+</ul>
+</div>
+</div>
+</section>
 <section id="plot-using-splines" class="slide level2">
 <h2>Plot using splines</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch"></section>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Fits a smooth curve with a series of polynomial segments</li>
+<li>The values delimiting the spline segments are called knots</li>
+</ul>
+</div>
+</div>
+</section>
 <section id="plot-using-gam" class="slide level2">
 <h2>Plot using GAM</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-13-1.png" width="960" class="r-stretch"></section>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-14-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Fits spline models with automated selection of knots</li>
+</ul>
+</div>
+</div>
+</section>
 <section id="plotting-using-loess" class="slide level2">
 <h2>Plotting using LOESS</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-14-1.png" width="960" class="r-stretch"><div class="footer footer-default">
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-15-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Also a smoothing technique but tends to be slow on large datasets</li>
+</ul>
+</div>
+</div>
+<div class="footer footer-default">
 
 </div>
 </section></section>
@@ -601,7 +665,7 @@
 
         // Transition style for full page slide backgrounds
         // (none/fade/slide/convex/concave/zoom)
-        backgroundTransition: 'fade',
+        backgroundTransition: 'zoom',
 
         // Number of slides away from the current that are visible
         viewDistance: 3,

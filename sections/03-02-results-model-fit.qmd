@@ -31,7 +31,7 @@ jmp_measures_of_model_fit %>%
 
 jmp_measures_of_model_fit %>% 
     ggplot(aes(x = residence, y = p.value, color = residence)) +
-    geom_violin() + 
+    geom_point() + 
     geom_jitter(width = 0.05) +
     facet_wrap(~var_long) +
     theme(legend.position = "none")
@@ -58,6 +58,14 @@ jmp_measures_of_model_fit %>%
 
 ```
 
+
+```{r}
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = p.value)) +
+    geom_histogram(binwidth = 0.01) +
+    geom_vline(xintercept = 0.05)
+```
+
 ```{r}
 
 jmp_measures_of_model_fit %>% 
@@ -79,6 +87,3 @@ jmp_measures_of_model_fit %>%
     facet_grid(residence~var_long) 
 
 ```
-
-
-
