@@ -21,6 +21,11 @@ library(broom)
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
 jmpraw <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/2022-10-18_jmp_sanitation_raw_data.csv")
+
+jmp_san_variables <- jmpraw %>% 
+    select(var_short, var_long, residence) %>% 
+    unique()
+
 ```
 
 # JMP Primary indicators:
@@ -52,7 +57,7 @@ jmp_urban_rural <- jmpraw %>%
 # summarise data by year
 
 jmp_all_mean_value <- jmp_urban_rural |> 
-    group_by(iso3, residence, var_long, year) |> 
+    group_by(iso3, var_short, year) |> 
     summarise(mean_value = mean(value)) %>% 
     ungroup()
 ```
@@ -61,7 +66,7 @@ jmp_all_mean_value <- jmp_urban_rural |>
 # Generating a tibble 
 
 min_max_year_iso3 <- jmp_all_mean_value |> 
-    group_by(iso3, var_long) |> 
+    group_by(iso3, var_short) |> 
     summarise(
         min = min(year),
         max = max(year)
@@ -88,14 +93,14 @@ nested_list <- list()
 
 for (name in unique(min_max_year_iso3$iso3)) {
     
-    for (var in filter(min_max_year_iso3, iso3 == name)$var_long) {
+    for (var in filter(min_max_year_iso3, iso3 == name)$var_short) {
         
         nested_list[[name]][[var]] <- tibble(
             iso3 = name,
-            var_long = var,
-            year = seq(from = filter(min_max_year_iso3, iso3 == name, var_long == var) %>% 
+            var_short = var,
+            year = seq(from = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
                            pull(min) - 2,
-                       to = filter(min_max_year_iso3, iso3 == name, var_long == var) %>% 
+                       to = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
                            pull(max) + 2,
                        by = 1)
         )
@@ -103,19 +108,19 @@ for (name in unique(min_max_year_iso3$iso3)) {
     }
 }
 
-iso3_var_long_list <- list()
+iso3_var_short_list <- list()
 
 for (name in unique(min_max_year_iso3$iso3)) {
     
-    iso3_var_long_list[[name]] <- nested_list[[name]] %>% 
+    iso3_var_short_list[[name]] <- nested_list[[name]] %>% 
         bind_rows()
     
 }
 
-year_seq_df <- iso3_var_long_list %>% 
+year_seq_df <- iso3_var_short_list %>% 
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
-     
+
 ```
 
 # All Mean estimates
@@ -124,7 +129,7 @@ year_seq_df <- iso3_var_long_list %>%
 
 jmp_mean_estimates <- jmp_all_mean_value %>%
     filter(iso3 %in% diff_smaller_five_year_vec) |> 
-    group_by(iso3, residence, var_long) %>% 
+    group_by(iso3, var_short) %>% 
     summarise(average_estimate = mean(mean_value)) |> 
     left_join(year_seq_df)
 
@@ -137,7 +142,7 @@ jmp_mean_estimates <- jmp_all_mean_value %>%
 
 jmp_models <- jmp_all_mean_value %>% 
     filter(iso3 %in% diff_greater_four_year_vec) |> 
-    nest_by(iso3, residence, var_long) %>% 
+    nest_by(iso3, var_short) %>% 
     mutate(model = list(lm(mean_value ~ year, data = data)))
 
 # jmp_models |> 
@@ -149,11 +154,13 @@ jmp_models <- jmp_all_mean_value %>%
 
 jmp_models |> 
     summarise(broom::tidy(model)) %>% 
+    left_join(jmp_san_variables) %>% 
     write_csv(file = "data/derived/jmp_primary_indicator_estimates_model_coefficients.csv")
 
 
 jmp_models |> 
     summarise(broom::glance(model)) %>% 
+    left_join(jmp_san_variables) %>%
     write_csv(file = "data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv")
 
 ```
@@ -175,15 +182,17 @@ jmp_fitted <- jmp_models %>%
 # Join fitted values to year seq df
 
 jmp_seq_fitted <- jmp_fitted %>% 
-    right_join(year_seq_df)
+    right_join(year_seq_df) %>% 
+    left_join(jmp_san_variables) 
 
 jmp_mean_estimates %>% 
-    relocate(year, .after = var_long) %>% 
+    relocate(year, .after = var_short) %>% 
     rename(estimate = average_estimate) %>% 
     bind_rows(
         jmp_seq_fitted %>% 
             rename(estimate = .fitted)
     ) %>% 
+    left_join(jmp_san_variables) %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
 ```
