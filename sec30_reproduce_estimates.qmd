@@ -20,6 +20,7 @@ library(broom)
 
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 
+jmpraw <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/2022-10-18_jmp_sanitation_raw_data.csv")
 ```
 
 # JMP Primary indicators:
@@ -85,8 +86,6 @@ nested_list <- list()
 
 # TODO: Improve this nested for loop (current execution time is about 15s)
 
-filter(min_max_year_iso3, iso3 == "AFG")$var_long
-
 for (name in unique(min_max_year_iso3$iso3)) {
     
     for (var in filter(min_max_year_iso3, iso3 == name)$var_long) {
@@ -116,7 +115,7 @@ for (name in unique(min_max_year_iso3$iso3)) {
 year_seq_df <- iso3_var_long_list %>% 
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
-
+     
 ```
 
 # All Mean estimates
