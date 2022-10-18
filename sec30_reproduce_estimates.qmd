@@ -185,15 +185,50 @@ jmp_seq_fitted <- jmp_fitted %>%
     right_join(year_seq_df) %>% 
     left_join(jmp_san_variables) 
 
-jmp_mean_estimates %>% 
+jmp_fitted %>% 
+    filter(iso3 == "AGO")
+
+jmp_mean_estimates  %>% 
+    filter(iso3 == "AGO")
+
+jmp_primary_indicator_estimates <- jmp_mean_estimates %>% 
     relocate(year, .after = var_short) %>% 
     rename(estimate = average_estimate) %>% 
+    left_join(jmp_san_variables) %>% 
     bind_rows(
         jmp_seq_fitted %>% 
             rename(estimate = .fitted)
-    ) %>% 
-    left_join(jmp_san_variables) %>%
+    )  
+
+jmp_primary_indicator_estimates %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
+
+jmp_primary_indicator_estimates %>% 
+    mutate(var_service_level = case_when(
+        var_short == s_imp_r ~ "san_bas_r",
+        var_short == s_imp_u ~ "san_bas_u"
+    ))
+count(var_long)
+
+
+
+jmp_primary_indicator_estimates %>% 
+    filter(iso3 == "AGO") %>% 
+    arrange(var_short, year)
+
+jmp_primary_indicator_estimates %>% 
+    filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
+    select(-var_long, -residence) %>% 
+    pivot_wider(names_from = "var_short", values_from = "estimate")
+    count(var_long)
+    
+    
+jmp_primary_indicator_estimates %>% 
+    filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
+    select(-var_long, -residence) %>%
+    dplyr::group_by(iso3, year, var_short) %>%
+    dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+    dplyr::filter(n > 1L) 
 
 ```
 
