@@ -15,8 +15,11 @@ library(tidyverse)
 # Data Import
 
 ```{r}
+
+# estimates produced by SDG 6.2 Reproducibility work
 jmp_estimates_derived <- read_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
+# estimates produced as part of washr R Package work
 jmp_estimates_original <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/jmp-washdata-indicators.csv")
 
 ```
@@ -26,6 +29,7 @@ jmp_estimates_original <- read_csv("https://raw.githubusercontent.com/larnsce/wa
 ```{r}
 
 jmp_estimates_derived
+jmp_estimates_original
 
 jmp_estimates_original %>% 
     filter(service == "sanitation") %>% 
