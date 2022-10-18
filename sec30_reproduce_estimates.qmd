@@ -72,16 +72,21 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         max = max(year)
     ) 
 
-diff_smaller_five_year_vec <- min_max_year_iso3 |> 
+
+min_max_year_iso3 |> 
+    mutate(diff = max - min) %>% 
+    filter(iso3 == "AGO")
+
+diff_smaller_five_year_df <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
-    filter(diff < 5) |>
-    pull(iso3) 
+    filter(diff < 5) %>% 
+    select(iso3, var_short)
 
 
-diff_greater_four_year_vec <- min_max_year_iso3 |> 
+diff_greater_four_year_df <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
     filter(diff >= 5) |>
-    pull(iso3)
+    select(iso3, var_short)
 
 ```
 
@@ -127,11 +132,24 @@ year_seq_df <- iso3_var_short_list %>%
 
 ```{r}
 
+
 jmp_mean_estimates <- jmp_all_mean_value %>%
     filter(iso3 %in% diff_smaller_five_year_vec) |> 
     group_by(iso3, var_short) %>% 
     summarise(average_estimate = mean(mean_value)) |> 
     left_join(year_seq_df)
+
+
+
+jmp_mean_estimates <- jmp_all_mean_value %>% 
+    right_join(diff_smaller_five_year_df) %>% 
+    group_by(iso3, var_short) %>% 
+    summarise(average_estimate = mean(mean_value)) %>% 
+    left_join(year_seq_df)
+    
+
+
+
 
 ```
 
@@ -141,9 +159,10 @@ jmp_mean_estimates <- jmp_all_mean_value %>%
 # Getting the model coefficients
 
 jmp_models <- jmp_all_mean_value %>% 
-    filter(iso3 %in% diff_greater_four_year_vec) |> 
+    #filter(iso3 %in% diff_greater_four_year_vec) |> 
+    right_join(diff_greater_four_year_df) %>% 
     nest_by(iso3, var_short) %>% 
-    mutate(model = list(lm(mean_value ~ year, data = data)))
+    mutate(model = list(lm(mean_value ~ year, data = data))) 
 
 # jmp_models |> 
 #     summarise(rsq = summary(model)$r.squared)
@@ -156,7 +175,6 @@ jmp_models |>
     summarise(broom::tidy(model)) %>% 
     left_join(jmp_san_variables) %>% 
     write_csv(file = "data/derived/jmp_primary_indicator_estimates_model_coefficients.csv")
-
 
 jmp_models |> 
     summarise(broom::glance(model)) %>% 
@@ -203,25 +221,26 @@ jmp_primary_indicator_estimates <- jmp_mean_estimates %>%
 jmp_primary_indicator_estimates %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
-jmp_primary_indicator_estimates %>% 
-    mutate(var_service_level = case_when(
-        var_short == s_imp_r ~ "san_bas_r",
-        var_short == s_imp_u ~ "san_bas_u"
-    ))
-count(var_long)
-
-
 
 jmp_primary_indicator_estimates %>% 
-    filter(iso3 == "AGO") %>% 
-    arrange(var_short, year)
+    filter(iso3 == "GRL") %>% 
+    arrange(var_short, year) %>% 
+    filter(str_detect(var_short, "shared")) %>% 
+    View()
 
 jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>% 
-    pivot_wider(names_from = "var_short", values_from = "estimate")
-    count(var_long)
-    
+    # removing NAs from estimate, but haven't identified reason for existence
+    filter(!is.na(estimate)) %>% 
+    pivot_wider(names_from = "var_short", values_from = "estimate") %>% 
+    filter(iso3 == "UGA") %>% 
+    mutate(
+        san_bas_r = s_imp_r - s_shared_r, 
+        san_lim_r = s_shared_r,
+        san_unimp_r = 100 - s_imp_r - s_shared_r - s_od_r,
+        san_od_r = s_od_r
+    )
     
 jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
