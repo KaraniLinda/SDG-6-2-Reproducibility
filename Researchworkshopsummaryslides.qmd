@@ -46,6 +46,8 @@ library(broom)
 #Getting data
 
 jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+jmpraw <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/2022-10-18_jmp_sanitation_raw_data.csv")
+
 jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
 
 jmp_measures_of_model_fit
@@ -196,7 +198,7 @@ jmpfilter
 
 ## OLS Regression : r squared < 0.30
 
-```{r , warning=FALSE, echo=FALSE, message=FALSE}
+```{r ols-regression, warning=FALSE, echo=FALSE, message=FALSE}
 
 library(gridExtra)
 
