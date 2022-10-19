@@ -143,15 +143,12 @@ Status
 
 :::
 
-# Reproducibility : Comparing our results to JMP estimates
-
-- Show plots comparing estimates
 
 # Plotting Model coefficients
 
 ## Model fit : R squared {auto-animate=true auto-animate-easing="ease-in-out"}
 
-::: {.r-stack}
+
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 
@@ -161,13 +158,11 @@ jmp_measures_of_model_fit %>%
     labs(title = "Model coefficients",
          subtitle = "r.squared")
 
-jmp_measures_of_model_fit %>% 
-    ggplot(aes(x = r.squared)) +
-    geom_histogram(binwidth = 0.10) +
-    geom_vline(xintercept = 0.30)
+
+
 
 ```
-:::
+
 
 ## Model fit : P value {auto-animate="true" auto-animate-easing="ease-in-out" }
 
@@ -235,7 +230,7 @@ grid.arrange(plot1, plot2)
 
 
 
-```{r , warning=FALSE, echo=FALSE, message=FALSE}
+```{r , warning=FALSE, include=FALSE, echo=FALSE, message=FALSE}
 # Fitting a polynomial of order 4
 
 
@@ -252,7 +247,7 @@ rsquared <- poly4model|>
   
 ```
 
-```{r , warning=FALSE, echo=FALSE, message=FALSE}
+```{r , warning=FALSE, include=FALSE, echo=FALSE, message=FALSE}
 #Splines
 
 library(splines)
@@ -268,7 +263,7 @@ rsquared <- splinemodel|>
 
 ```
 
-```{r , warning=FALSE, echo=FALSE, message=FALSE}
+```{r , warning=FALSE,include=FALSE, echo=FALSE, message=FALSE}
 # Generalized Additive Model
 
 library(mgcv)
@@ -287,11 +282,11 @@ tidy(GAMmodel) %>% kable()
     
 ```
 
-```{r, warning=FALSE, echo=FALSE, message=FALSE}
+```{r, warning=FALSE,include=FALSE, echo=FALSE, message=FALSE}
 jmp_all_mean_value %>% add_residuals(GAMmodel) %>% add_fitted(GAMmodel) %>% kable() %>%  scroll_box(height = "200px")
 ```
 
-```{r , warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
+```{r , warning=FALSE, include=FALSE,echo=FALSE, message=FALSE, include=FALSE}
 #Loess
 
 

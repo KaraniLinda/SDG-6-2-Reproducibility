@@ -58,7 +58,6 @@ jmp_measures_of_model_fit %>%
 
 ```
 
-
 ```{r}
 jmp_measures_of_model_fit %>% 
     ggplot(aes(x = r.squared)) +
