@@ -133,12 +133,12 @@ year_seq_df <- iso3_var_short_list %>%
 ```{r}
 
 
-jmp_mean_estimates <- jmp_all_mean_value %>%
-    filter(iso3 %in% diff_smaller_five_year_vec) |> 
-    group_by(iso3, var_short) %>% 
-    summarise(average_estimate = mean(mean_value)) |> 
-    left_join(year_seq_df)
-
+# jmp_mean_estimates <- jmp_all_mean_value %>%
+#     filter(iso3 %in% diff_smaller_five_year_vec) |> 
+#     group_by(iso3, var_short) %>% 
+#     summarise(average_estimate = mean(mean_value)) |> 
+#     left_join(year_seq_df)
+# 
 
 
 jmp_mean_estimates <- jmp_all_mean_value %>% 
@@ -196,7 +196,6 @@ jmp_fitted <- jmp_models %>%
 ```
 
 ```{r}
-
 # Join fitted values to year seq df
 
 jmp_seq_fitted <- jmp_fitted %>% 
@@ -227,16 +226,34 @@ jmp_primary_indicator_estimates %>%
     arrange(var_short, year) %>% 
     filter(str_detect(var_short, "shared")) %>% 
     View()
+```
 
-jmp_primary_indicator_estimates %>% 
+## Calculation of secondary indicators
+
+A basic sanitation service (S8) is defined as use of an improved sanitation facility which is not shared with other households. This is calculated by multiplying the estimate of the population using improved sanitation facilities (S1) by ratio RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
+
+- S8 = S1 * RS1
+
+RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
+
+- RS1 = S1 / S1 - "shared"
+
+```{r}
+
+
+jmp_primary_indicator_estimates_wide <- jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>% 
     # removing NAs from estimate, but haven't identified reason for existence
-    filter(!is.na(estimate)) %>% 
+    filter(!is.na(estimate))
+
+
+jmp_primary_indicator_estimates_wide %>% 
     pivot_wider(names_from = "var_short", values_from = "estimate") %>% 
     filter(iso3 == "UGA") %>% 
     mutate(
-        san_bas_r = s_imp_r - s_shared_r, 
+        RS1 = (s_imp_r - s_shared_r) / s_imp_r, 
+        san_bas_r = s_imp_r * RS1,
         san_lim_r = s_shared_r,
         san_unimp_r = 100 - s_imp_r - s_shared_r - s_od_r,
         san_od_r = s_od_r
