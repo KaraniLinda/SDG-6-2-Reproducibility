@@ -49,9 +49,24 @@ jmp_urban_rural <- jmpraw %>%
 # limited services (improved, but shared)
 # open defecation (open defecation)
 # unimproved services (improved - open defecation)
+jmpraw %>%  
+    filter(residence == "national") %>% 
+    filter(var_long %in% c("Open defecation", "Improved", "Shared", "Septic" , "Sewer")) %>% 
+    count(iso3)
 
 
 ```
+
+In 42 out of 232 countries, areas and territories, data inputs were not available disaggregated into urban and rural populations, and national estimates were generated directly. In eight countries, areas or territories, the entire population is classified as either urban or rural. In these cases national estimates are identical to the urban or rural estimates.
+
+TODO: Which are those countries and how are estimates currently calculated? Currently not calculated.
+
+## Average by year
+
+When more than two data points exist for one year, the mean is calculated for that specific year. (Page 8)
+
+> Some panel surveys collect multiple rounds within a single year, or disaggregate findings temporally (e.g. by rainy
+and dry season). In this case, where possible, data will be combined into a single set of statistics representing average values for the year
 
 ```{r}
 # summarise data by year
@@ -62,8 +77,37 @@ jmp_all_mean_value <- jmp_urban_rural |>
     ungroup()
 ```
 
+## Rules
+
+**Interpolation rules (within the years covered by data inputs)**
+
+1. If data points are at least five years apart, estimates are interpolated using ordinary least squares linear regression.
+2. If data points are less than five years apart, estimates are interpolated using a simple average.
+
+**Extrapolation rules (outside the years covered by data inputs)**
+
+3. If there are at least two data points, estimates are extrapolated using ordinary least squares linear regression (or simple average, if data points are less than five years apart) forwards two years from the latest data point, and backwards two years from the earliest data point.
+
+4. If extrapolation results in estimates above 100% or below 0%, the estimates are fixed at 100% and 0%, respectively.
+
+5. If there is only one data point, no extrapolation is made. 
+
+**Extension rules (beyond the years covered by data inputs and extrapolation)**
+
+6. Estimates are extended forwards four years from the latest estimate, and backwards four years from the earliest estimate
+
+7. Estimates are extended forwards or backwards indefinitely, if the estimate is 99.5% or greater, or 0.5% or less.
+
+## Interpolation 
+
+The method for building an estimate are based on the number of years that data points are apart. We therefore identify the minimum and maximum year for each country and variable.
+
+Then, the difference is calculated and the dataframe is split by a difference of:
+
+- less than 5 years -> simple average interpolation rule
+- at least 5 years apart -> ordinary least squares linear regression interpolation rule
+
 ```{r}
-# Generating a tibble 
 
 min_max_year_iso3 <- jmp_all_mean_value |> 
     group_by(iso3, var_short) |> 
@@ -71,11 +115,6 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         min = min(year),
         max = max(year)
     ) 
-
-
-min_max_year_iso3 |> 
-    mutate(diff = max - min) %>% 
-    filter(iso3 == "AGO")
 
 diff_smaller_five_year_df <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
@@ -89,6 +128,12 @@ diff_greater_four_year_df <- min_max_year_iso3 |>
     select(iso3, var_short)
 
 ```
+
+## Extrapolation
+
+The followin code creates a dataframe that contains a variable 'year' which 
+contains the extrapolation of two years for all countries, based on the 
+minimum and maximum for each variable.
 
 ```{r}
 
@@ -146,7 +191,7 @@ jmp_mean_estimates <- jmp_all_mean_value %>%
     group_by(iso3, var_short) %>% 
     summarise(average_estimate = mean(mean_value)) %>% 
     left_join(year_seq_df)
-    
+
 
 
 
@@ -232,11 +277,11 @@ jmp_primary_indicator_estimates %>%
 
 A basic sanitation service (S8) is defined as use of an improved sanitation facility which is not shared with other households. This is calculated by multiplying the estimate of the population using improved sanitation facilities (S1) by ratio RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
 
-- S8 = S1 * RS1
+-   S8 = S1 \* RS1
 
 RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
 
-- RS1 = S1 / S1 - "shared"
+-   RS1 = S1 / S1 - "shared"
 
 ```{r}
 
@@ -245,11 +290,11 @@ jmp_primary_indicator_estimates_wide <- jmp_primary_indicator_estimates %>%
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>% 
     # removing NAs from estimate, but haven't identified reason for existence
-    filter(!is.na(estimate))
+    filter(!is.na(estimate)) %>% 
+    pivot_wider(names_from = "var_short", values_from = "estimate") 
 
 
 jmp_primary_indicator_estimates_wide %>% 
-    pivot_wider(names_from = "var_short", values_from = "estimate") %>% 
     filter(iso3 == "UGA") %>% 
     mutate(
         RS1 = (s_imp_r - s_shared_r) / s_imp_r, 
@@ -258,7 +303,7 @@ jmp_primary_indicator_estimates_wide %>%
         san_unimp_r = 100 - s_imp_r - s_shared_r - s_od_r,
         san_od_r = s_od_r
     )
-    
+
 jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>%
