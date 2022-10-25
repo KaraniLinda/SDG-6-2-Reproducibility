@@ -49,9 +49,24 @@ jmp_urban_rural <- jmpraw %>%
 # limited services (improved, but shared)
 # open defecation (open defecation)
 # unimproved services (improved - open defecation)
+jmpraw %>%  
+    filter(residence == "national") %>% 
+    filter(var_long %in% c("Open defecation", "Improved", "Shared", "Septic" , "Sewer")) %>% 
+    count(iso3)
 
 
 ```
+
+In 42 out of 232 countries, areas and territories, data inputs were not available disaggregated into urban and rural populations, and national estimates were generated directly. In eight countries, areas or territories, the entire population is classified as either urban or rural. In these cases national estimates are identical to the urban or rural estimates.
+
+TODO: Which are those countries and how are estimates currently calculated? Currently not calculated.
+
+## Average by year
+
+When more than two data points exist for one year, the mean is calculated for that specific year. (Page 8)
+
+> Some panel surveys collect multiple rounds within a single year, or disaggregate findings temporally (e.g. by rainy
+and dry season). In this case, where possible, data will be combined into a single set of statistics representing average values for the year
 
 ```{r}
 # summarise data by year
@@ -62,8 +77,37 @@ jmp_all_mean_value <- jmp_urban_rural |>
     ungroup()
 ```
 
+## Rules
+
+**Interpolation rules (within the years covered by data inputs)**
+
+1. If data points are at least five years apart, estimates are interpolated using ordinary least squares linear regression.
+2. If data points are less than five years apart, estimates are interpolated using a simple average.
+
+**Extrapolation rules (outside the years covered by data inputs)**
+
+3. If there are at least two data points, estimates are extrapolated using ordinary least squares linear regression (or simple average, if data points are less than five years apart) forwards two years from the latest data point, and backwards two years from the earliest data point.
+
+4. If extrapolation results in estimates above 100% or below 0%, the estimates are fixed at 100% and 0%, respectively.
+
+5. If there is only one data point, no extrapolation is made. 
+
+**Extension rules (beyond the years covered by data inputs and extrapolation)**
+
+6. Estimates are extended forwards four years from the latest estimate, and backwards four years from the earliest estimate
+
+7. Estimates are extended forwards or backwards indefinitely, if the estimate is 99.5% or greater, or 0.5% or less.
+
+## Interpolation 
+
+The method for building an estimate are based on the number of years that data points are apart. We therefore identify the minimum and maximum year for each country and variable.
+
+Then, the difference is calculated and the dataframe is split by a difference of:
+
+- less than 5 years -> simple average interpolation rule
+- at least 5 years apart -> ordinary least squares linear regression interpolation rule
+
 ```{r}
-# Generating a tibble 
 
 min_max_year_iso3 <- jmp_all_mean_value |> 
     group_by(iso3, var_short) |> 
@@ -72,23 +116,30 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         max = max(year)
     ) 
 
-
-min_max_year_iso3 |> 
-    mutate(diff = max - min) %>% 
-    filter(iso3 == "AGO")
-
-diff_smaller_five_year_df <- min_max_year_iso3 |> 
+diff_smaller_five_year_min_max <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
-    filter(diff < 5) %>% 
+    filter(diff < 5) 
+
+diff_smaller_five_year_df <- diff_smaller_five_year_min_max %>% 
     select(iso3, var_short)
 
 
-diff_greater_four_year_df <- min_max_year_iso3 |> 
+diff_greater_four_year_min_max <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
-    filter(diff >= 5) |>
+    filter(diff >= 5) 
+
+diff_greater_four_year_df <- diff_greater_four_year_min_max |>
     select(iso3, var_short)
 
 ```
+
+## Extrapolation
+
+### Linear regression
+
+The followin code creates a dataframe that contains a variable 'year' which 
+contains the extrapolation of two years for all countries, based on the 
+minimum and maximum for each variable.
 
 ```{r}
 
@@ -96,16 +147,16 @@ nested_list <- list()
 
 # TODO: Improve this nested for loop (current execution time is about 15s)
 
-for (name in unique(min_max_year_iso3$iso3)) {
+for (name in unique(diff_greater_four_year_min_max$iso3)) {
     
-    for (var in filter(min_max_year_iso3, iso3 == name)$var_short) {
+    for (var in filter(diff_greater_four_year_min_max, iso3 == name)$var_short) {
         
         nested_list[[name]][[var]] <- tibble(
             iso3 = name,
             var_short = var,
-            year = seq(from = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
+            year = seq(from = filter(diff_greater_four_year_min_max, iso3 == name, var_short == var) %>% 
                            pull(min) - 2,
-                       to = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
+                       to = filter(diff_greater_four_year_min_max, iso3 == name, var_short == var) %>% 
                            pull(max) + 2,
                        by = 1)
         )
@@ -115,7 +166,7 @@ for (name in unique(min_max_year_iso3$iso3)) {
 
 iso3_var_short_list <- list()
 
-for (name in unique(min_max_year_iso3$iso3)) {
+for (name in unique(diff_greater_four_year_min_max$iso3)) {
     
     iso3_var_short_list[[name]] <- nested_list[[name]] %>% 
         bind_rows()
@@ -126,30 +177,63 @@ year_seq_df <- iso3_var_short_list %>%
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
 
+
+
 ```
+
+### Mean values
+
+```{r}
+
+year_seq_df_all_years <- min_max_year_iso3 %>% 
+    distinct(iso3, var_short) %>% 
+    ungroup() %>% 
+    nest_by(iso3, var_short) %>% 
+    select(-data) %>% 
+    mutate(year = list(seq(2000, 2020))) %>% 
+    unnest(cols = c(year)) 
+```
+
+
+## Extension
+
+Example: Afghanistan, Septic Tanks, urban
+
+Last raw data point 2011. Extrapolation 2 years to 2009. Extension 4 years to 2005. 
+
+**Note:** In JMP country files, estimates are extended beyond plus/minus 4 years.
+
+```{r}
+
+year_seq_df %>% 
+    filter(iso3 == "AFG", var_short == "s_sep_u")
+    count(iso3, var_short)
+```
+
+```{r}
+year_seq_df %>% 
+    filter(iso3 == "AUT", var_short == "s_sep_u")
+    count(iso3, var_short)
+
+```
+
 
 # All Mean estimates
 
 ```{r}
 
-
-jmp_mean_estimates <- jmp_all_mean_value %>%
-    filter(iso3 %in% diff_smaller_five_year_vec) |> 
-    group_by(iso3, var_short) %>% 
-    summarise(average_estimate = mean(mean_value)) |> 
-    left_join(year_seq_df)
-
-
+# jmp_mean_estimates <- jmp_all_mean_value %>%
+#     filter(iso3 %in% diff_smaller_five_year_vec) |> 
+#     group_by(iso3, var_short) %>% 
+#     summarise(average_estimate = mean(mean_value)) |> 
+#     left_join(year_seq_df)
+# 
 
 jmp_mean_estimates <- jmp_all_mean_value %>% 
     right_join(diff_smaller_five_year_df) %>% 
     group_by(iso3, var_short) %>% 
     summarise(average_estimate = mean(mean_value)) %>% 
-    left_join(year_seq_df)
-    
-
-
-
+    left_join(year_seq_df_all_years) 
 
 ```
 
@@ -170,7 +254,6 @@ jmp_models <- jmp_all_mean_value %>%
 # jmp_models |> 
 #     summarise(broom::glance(model)) 
 
-
 jmp_models |> 
     summarise(broom::tidy(model)) %>% 
     left_join(jmp_san_variables) %>% 
@@ -185,6 +268,8 @@ jmp_models |>
 
 # All fitted values from OLS regression
 
+## Run linear regression for all years
+
 ```{r}
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
@@ -195,59 +280,111 @@ jmp_fitted <- jmp_models %>%
 
 ```
 
-```{r}
+## Remove years for which data extrapolates beyond 2 years
 
+```{r}
 # Join fitted values to year seq df
 
 jmp_seq_fitted <- jmp_fitted %>% 
-    right_join(year_seq_df) %>% 
-    left_join(jmp_san_variables) 
+    # remove the years for which the extrapolation goes beyond 2 years
+    right_join(year_seq_df) 
 
 jmp_fitted %>% 
-    filter(iso3 == "AGO")
+    filter(iso3 == "AGO",
+           var_short == "s_shared_u") 
 
-jmp_mean_estimates  %>% 
-    filter(iso3 == "AGO")
+year_seq_df %>% 
+    filter(iso3 == "AGO",
+           var_short == "s_shared_u") 
+
+```
+
+
+```{r}
+# Use sequence for all years to prepare for extension to 2000 and 2020 after
+# linear regression 
+
+jmp_seq_fitted_extended <- year_seq_df_all_years %>% 
+    # NAs are introduced here. They are var_long for countries were averages 
+    # are computed
+    left_join(jmp_seq_fitted) %>% 
+    group_by(iso3, var_short) %>% 
+    fill(.fitted, .direction = "updown") %>% 
+    # remove NAs. 
+    filter(!is.na(.fitted))
+
+
+```
+
+## Add var_long and residence variables
+
+```{r}
+
+jmp_seq_fitted_extended_complete <- jmp_seq_fitted_extended %>% 
+    left_join(jmp_san_variables)
+
+```
+
+## Combine mean estimates and linear model into one dataframe
+
+```{r}
 
 jmp_primary_indicator_estimates <- jmp_mean_estimates %>% 
     relocate(year, .after = var_short) %>% 
     rename(estimate = average_estimate) %>% 
     left_join(jmp_san_variables) %>% 
     bind_rows(
-        jmp_seq_fitted %>% 
+        jmp_seq_fitted_extended_complete %>% 
             rename(estimate = .fitted)
     )  
 
 jmp_primary_indicator_estimates %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
+jmp_primary_indicator_estimates
 
-jmp_primary_indicator_estimates %>% 
-    filter(iso3 == "GRL") %>% 
-    arrange(var_short, year) %>% 
-    filter(str_detect(var_short, "shared")) %>% 
-    View()
+```
 
-jmp_primary_indicator_estimates %>% 
+## Calculation of secondary indicators
+
+A basic sanitation service (S8) is defined as use of an improved sanitation facility which is not shared with other households. This is calculated by multiplying the estimate of the population using improved sanitation facilities (S1) by ratio RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
+
+-   S8 = S1 \* RS1
+
+RS1, the ratio of the population using improved facilities which are not shared to the total population using improved facilities.
+
+-   RS1 = S1 / S1 - "shared"
+
+### Questions
+
+1. Is the estimate for shared in each year calculated using averages over all
+years with data points?
+
+2. How exactly is the ratio RS1 calculated?
+
+3. Multiplying s_imp_r with s_shared_r / 100 provides estimates for san_bas_r 
+that align with the JMP estimates, but this calculation does not follow the
+method described in the 2017 methods document.
+
+```{r}
+
+
+jmp_primary_indicator_estimates_wide <- jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>% 
-    # removing NAs from estimate, but haven't identified reason for existence
-    filter(!is.na(estimate)) %>% 
-    pivot_wider(names_from = "var_short", values_from = "estimate") %>% 
-    filter(iso3 == "UGA") %>% 
+    pivot_wider(names_from = "var_short", values_from = "estimate") 
+
+jmp_primary_indicator_estimates_wide %>% 
+    filter(iso3 == "AFG") %>% 
     mutate(
-        san_bas_r = s_imp_r - s_shared_r, 
-        san_lim_r = s_shared_r,
-        san_unimp_r = 100 - s_imp_r - s_shared_r - s_od_r,
+        # RS1 = (s_imp_r - s_shared_r) / s_imp_r,
+        # san_bas_r2 = s_imp_r * RS1,
+        san_lim_r = s_imp_r * (s_shared_r / 100), 
+        san_bas_r = s_imp_r - san_lim_r,
+        san_unimp_r = 100 - s_imp_r - san_lim_r - s_od_r,
         san_od_r = s_od_r
-    )
-    
-jmp_primary_indicator_estimates %>% 
-    filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
-    select(-var_long, -residence) %>%
-    dplyr::group_by(iso3, year, var_short) %>%
-    dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
-    dplyr::filter(n > 1L) 
+    ) 
+
 
 ```
 
