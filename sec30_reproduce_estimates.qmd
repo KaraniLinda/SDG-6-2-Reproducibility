@@ -355,6 +355,17 @@ RS1, the ratio of the population using improved facilities which are not shared 
 
 -   RS1 = S1 / S1 - "shared"
 
+### Questions
+
+1. Is the estimate for shared in each year calculated using averages over all
+years with data points?
+
+2. How exactly is the ratio RS1 calculated?
+
+3. Multiplying s_imp_r with s_shared_r / 100 provides estimates for san_bas_r 
+that align with the JMP estimates, but this calculation does not follow the
+method described in the 2017 methods document.
+
 ```{r}
 
 
@@ -363,10 +374,11 @@ jmp_primary_indicator_estimates_wide <- jmp_primary_indicator_estimates %>%
     select(-var_long, -residence) %>% 
     pivot_wider(names_from = "var_short", values_from = "estimate") 
 
-
 jmp_primary_indicator_estimates_wide %>% 
     filter(iso3 == "AFG") %>% 
     mutate(
+        # RS1 = (s_imp_r - s_shared_r) / s_imp_r,
+        # san_bas_r2 = s_imp_r * RS1,
         san_lim_r = s_imp_r * (s_shared_r / 100), 
         san_bas_r = s_imp_r - san_lim_r,
         san_unimp_r = 100 - s_imp_r - san_lim_r - s_od_r,
