@@ -116,20 +116,26 @@ min_max_year_iso3 <- jmp_all_mean_value |>
         max = max(year)
     ) 
 
-diff_smaller_five_year_df <- min_max_year_iso3 |> 
+diff_smaller_five_year_min_max <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
-    filter(diff < 5) %>% 
+    filter(diff < 5) 
+
+diff_smaller_five_year_df <- diff_smaller_five_year_min_max %>% 
     select(iso3, var_short)
 
 
-diff_greater_four_year_df <- min_max_year_iso3 |> 
+diff_greater_four_year_min_max <- min_max_year_iso3 |> 
     mutate(diff = max - min) |> 
-    filter(diff >= 5) |>
+    filter(diff >= 5) 
+
+diff_greater_four_year_df <- diff_greater_four_year_min_max |>
     select(iso3, var_short)
 
 ```
 
 ## Extrapolation
+
+### Linear regression
 
 The followin code creates a dataframe that contains a variable 'year' which 
 contains the extrapolation of two years for all countries, based on the 
@@ -141,16 +147,16 @@ nested_list <- list()
 
 # TODO: Improve this nested for loop (current execution time is about 15s)
 
-for (name in unique(min_max_year_iso3$iso3)) {
+for (name in unique(diff_greater_four_year_min_max$iso3)) {
     
-    for (var in filter(min_max_year_iso3, iso3 == name)$var_short) {
+    for (var in filter(diff_greater_four_year_min_max, iso3 == name)$var_short) {
         
         nested_list[[name]][[var]] <- tibble(
             iso3 = name,
             var_short = var,
-            year = seq(from = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
+            year = seq(from = filter(diff_greater_four_year_min_max, iso3 == name, var_short == var) %>% 
                            pull(min) - 2,
-                       to = filter(min_max_year_iso3, iso3 == name, var_short == var) %>% 
+                       to = filter(diff_greater_four_year_min_max, iso3 == name, var_short == var) %>% 
                            pull(max) + 2,
                        by = 1)
         )
@@ -160,7 +166,7 @@ for (name in unique(min_max_year_iso3$iso3)) {
 
 iso3_var_short_list <- list()
 
-for (name in unique(min_max_year_iso3$iso3)) {
+for (name in unique(diff_greater_four_year_min_max$iso3)) {
     
     iso3_var_short_list[[name]] <- nested_list[[name]] %>% 
         bind_rows()
@@ -171,12 +177,50 @@ year_seq_df <- iso3_var_short_list %>%
     bind_rows() |> 
     filter(year >= 2000 & year <= 2020)
 
+
+
 ```
+
+### Mean values
+
+```{r}
+
+year_seq_df_all_years <- min_max_year_iso3 %>% 
+    distinct(iso3, var_short) %>% 
+    ungroup() %>% 
+    nest_by(iso3, var_short) %>% 
+    select(-data) %>% 
+    mutate(year = list(seq(2000, 2020))) %>% 
+    unnest(cols = c(year)) 
+```
+
+
+## Extension
+
+Example: Afghanistan, Septic Tanks, urban
+
+Last raw data point 2011. Extrapolation 2 years to 2009. Extension 4 years to 2005. 
+
+**Note:** In JMP country files, estimates are extended beyond plus/minus 4 years.
+
+```{r}
+
+year_seq_df %>% 
+    filter(iso3 == "AFG", var_short == "s_sep_u")
+    count(iso3, var_short)
+```
+
+```{r}
+year_seq_df %>% 
+    filter(iso3 == "AUT", var_short == "s_sep_u")
+    count(iso3, var_short)
+
+```
+
 
 # All Mean estimates
 
 ```{r}
-
 
 # jmp_mean_estimates <- jmp_all_mean_value %>%
 #     filter(iso3 %in% diff_smaller_five_year_vec) |> 
@@ -185,16 +229,11 @@ year_seq_df <- iso3_var_short_list %>%
 #     left_join(year_seq_df)
 # 
 
-
 jmp_mean_estimates <- jmp_all_mean_value %>% 
     right_join(diff_smaller_five_year_df) %>% 
     group_by(iso3, var_short) %>% 
     summarise(average_estimate = mean(mean_value)) %>% 
-    left_join(year_seq_df)
-
-
-
-
+    left_join(year_seq_df_all_years) 
 
 ```
 
@@ -215,7 +254,6 @@ jmp_models <- jmp_all_mean_value %>%
 # jmp_models |> 
 #     summarise(broom::glance(model)) 
 
-
 jmp_models |> 
     summarise(broom::tidy(model)) %>% 
     left_join(jmp_san_variables) %>% 
@@ -230,6 +268,8 @@ jmp_models |>
 
 # All fitted values from OLS regression
 
+## Run linear regression for all years
+
 ```{r}
 
 dat_year <- tibble(year = seq(2000, 2020, 1))
@@ -240,37 +280,67 @@ jmp_fitted <- jmp_models %>%
 
 ```
 
+## Remove years for which data extrapolates beyond 2 years
+
 ```{r}
 # Join fitted values to year seq df
 
 jmp_seq_fitted <- jmp_fitted %>% 
-    right_join(year_seq_df) %>% 
-    left_join(jmp_san_variables) 
+    # remove the years for which the extrapolation goes beyond 2 years
+    right_join(year_seq_df) 
 
 jmp_fitted %>% 
-    filter(iso3 == "AGO")
+    filter(iso3 == "AGO",
+           var_short == "s_shared_u") 
 
-jmp_mean_estimates  %>% 
-    filter(iso3 == "AGO")
+year_seq_df %>% 
+    filter(iso3 == "AGO",
+           var_short == "s_shared_u") 
+
+```
+
+
+```{r}
+# Use sequence for all years to prepare for extension to 2000 and 2020 after
+# linear regression 
+
+jmp_seq_fitted_extended <- year_seq_df_all_years %>% 
+    # NAs are introduced here. They are var_long for countries were averages 
+    # are computed
+    left_join(jmp_seq_fitted) %>% 
+    group_by(iso3, var_short) %>% 
+    fill(.fitted, .direction = "updown") %>% 
+    # remove NAs. 
+    filter(!is.na(.fitted))
+
+
+```
+
+## Add var_long and residence variables
+
+```{r}
+
+jmp_seq_fitted_extended_complete <- jmp_seq_fitted_extended %>% 
+    left_join(jmp_san_variables)
+
+```
+
+## Combine mean estimates and linear model into one dataframe
+
+```{r}
 
 jmp_primary_indicator_estimates <- jmp_mean_estimates %>% 
     relocate(year, .after = var_short) %>% 
     rename(estimate = average_estimate) %>% 
     left_join(jmp_san_variables) %>% 
     bind_rows(
-        jmp_seq_fitted %>% 
+        jmp_seq_fitted_extended_complete %>% 
             rename(estimate = .fitted)
     )  
 
 jmp_primary_indicator_estimates %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
-
-jmp_primary_indicator_estimates %>% 
-    filter(iso3 == "GRL") %>% 
-    arrange(var_short, year) %>% 
-    filter(str_detect(var_short, "shared")) %>% 
-    View()
 ```
 
 ## Calculation of secondary indicators
