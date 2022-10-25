@@ -341,6 +341,8 @@ jmp_primary_indicator_estimates <- jmp_mean_estimates %>%
 jmp_primary_indicator_estimates %>%
     write_csv("data/derived/jmp_primary_indicator_estimates.csv")
 
+jmp_primary_indicator_estimates
+
 ```
 
 ## Calculation of secondary indicators
@@ -359,27 +361,18 @@ RS1, the ratio of the population using improved facilities which are not shared 
 jmp_primary_indicator_estimates_wide <- jmp_primary_indicator_estimates %>% 
     filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
     select(-var_long, -residence) %>% 
-    # removing NAs from estimate, but haven't identified reason for existence
-    filter(!is.na(estimate)) %>% 
     pivot_wider(names_from = "var_short", values_from = "estimate") 
 
 
 jmp_primary_indicator_estimates_wide %>% 
-    filter(iso3 == "UGA") %>% 
+    filter(iso3 == "AFG") %>% 
     mutate(
-        RS1 = (s_imp_r - s_shared_r) / s_imp_r, 
-        san_bas_r = s_imp_r * RS1,
-        san_lim_r = s_shared_r,
-        san_unimp_r = 100 - s_imp_r - s_shared_r - s_od_r,
+        san_lim_r = s_imp_r * (s_shared_r / 100), 
+        san_bas_r = s_imp_r - san_lim_r,
+        san_unimp_r = 100 - s_imp_r - san_lim_r - s_od_r,
         san_od_r = s_od_r
-    )
+    ) 
 
-jmp_primary_indicator_estimates %>% 
-    filter(var_long %in% c("Improved", "Open defecation", "Shared")) %>% 
-    select(-var_long, -residence) %>%
-    dplyr::group_by(iso3, year, var_short) %>%
-    dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
-    dplyr::filter(n > 1L) 
 
 ```
 
