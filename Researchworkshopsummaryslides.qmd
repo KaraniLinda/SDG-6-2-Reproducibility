@@ -2,14 +2,13 @@
 title: "Research workshop summary slides"
 format: 
    revealjs:
+       smaller: true
        transition: slide
        background-transition: zoom
        css: ["theme/theme.css"]
        theme: moon
        echo: false
 ---
-
-# DATA SCIENCE WORKSHOP
 
 # SDG 6.2 Reproducibility
 
@@ -23,16 +22,13 @@ Raw data package documentation (proof-of-concept website)
 
 Master Thesis Project
 
--   Input: Data Package
--   Status
--   What has worked? What hasn't?
--   Plots exploring the statistics
--   Recommendations
--   Gaps
--   Learning
+-   Reproducing the sanitation estimates
+-   Plots exploring the OLS regression
+-   Plots showing the model fit coefficients
+-   Alternative models and coefficients
 -   Next steps
 
-```{r}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 #Loading necessary libraries
 
 library(tidyverse)
@@ -41,157 +37,66 @@ library(broom)
 
 ```
 
-
 ```{r, include=FALSE, message=FALSE, warning=FALSE }
 #Getting data
 
-jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
+#jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
 jmpraw <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/2022-10-18_jmp_sanitation_raw_data.csv")
 
 jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
 
-jmp_measures_of_model_fit
+jmp_all_mean_value <-read_csv(here::here("data/derived/jmp_all_mean_estimates.csv"))
 ```
 
-```{r, include=FALSE, message=FALSE, warning=FALSE}
+## Masters thesis otline
 
-jmp_urban_rural <- jmpraw %>%  
-    filter(residence != "national") %>% 
-    filter(var_long %in% c("Open defecation", "Improved", "Shared", "Septic" , "Sewer"))
-
-jmp_urban_rural
-
-jmp_all_mean_value <- jmp_urban_rural |> 
-    group_by(iso3, residence, var_long, year) |> 
-    summarise(mean_value = mean(value)) %>% 
-    ungroup()
-
-
-jmp_all_mean_value
-
-min_max_year_iso3 <- jmp_all_mean_value |> 
-    group_by(iso3, var_long) |> 
-    summarise(
-        min = min(year),
-        max = max(year)
-    ) 
-
-diff_smaller_five_year_vec <- min_max_year_iso3 |> 
-    mutate(diff = max - min) |> 
-    filter(diff < 5) |>
-    pull(iso3) 
-
-
-diff_greater_four_year_vec <- min_max_year_iso3 |> 
-    mutate(diff = max - min) |> 
-    filter(diff >= 5) |>
-    pull(iso3)
-
-options(scipen=999, digits = 2)
-
-jmp_models <- jmp_all_mean_value %>% 
-    filter(iso3 %in% diff_greater_four_year_vec) |> 
-    nest_by(iso3, residence, var_long) %>% 
-    mutate(model = list(lm(mean_value ~ year, data = data)))
-
-jmprsquared <- jmp_models |> 
-    summarise(rsq = summary(model)$r.squared) 
-
-
-jmp_models |> 
-    summarise(broom::glance(model))
-
-jmp_models |> 
-    summarise(broom::tidy(model))
-
-
-
-
-
-```
-
-
-## Project outline
-
-Introduction
-
-Methods
-
-Results
-
-- Linear regression: Comparison of primary estimates with JMP Estimates
-- Measures of goodness of fit: How well does the model fit the data for different countries?(R squared, pvalue)
-- Alternative models: Moving beyond linearity
-
-Discussion
-
-Conclusion and recommendations
-
-
-## Masters thesis progress
-
-::: {.incremental}
+::: incremental
 
 Objectives
 
-- Generate sanitation estimates from raw packaged data using documented methods
+- Generate sanitation estimates for rural and urban from raw packaged data using documented methods
+     - only the primary indicators and derived secondary service levels:
+         - basic sanitation service
+         - limited sanitation service
+         - unimproved sanitation service
+         - no sanitation service
+
 - Fit different statistical models to assess goodness of fit
 
 Status
 
-- Managed to derive estimates for the primary indicators
+- Managed to derive estimates for the primary indicators and derived secondary
+service levels
 
 :::
 
 
-# Plotting Model coefficients
-
-## Model fit : R squared {auto-animate=true auto-animate-easing="ease-in-out"}
-
-
-```{r, warning=FALSE, echo=FALSE, message=FALSE}
-
-
-jmp_measures_of_model_fit %>% 
-    ggplot(aes(x = var_long, y = r.squared)) + geom_boxplot(fill = "pink") +
-    facet_wrap(~residence)+
-    labs(title = "Model coefficients",
-         subtitle = "r.squared")
 
 
 
-
-```
-
-
-## Model fit : P value {auto-animate="true" auto-animate-easing="ease-in-out" }
+```{r}
+#Filter for R2 less than 0.30
+options(scipen=999, digits = 2)
 
 
-```{r, warning=FALSE, echo=FALSE, message=FALSE}
-jmp_measures_of_model_fit %>% 
-    ggplot(aes(x = var_long, y = p.value)) + geom_boxplot(fill = "pink") +           
-    facet_wrap(~residence)+
-    labs(title = "Model coefficients",
-         subtitle = "pvalue")
+high_rsq <- jmp_measures_of_model_fit %>% 
+    group_by(var_short) %>% 
+    filter(r.squared > 0.80)
 
-    
-```
-
-
-
-
-```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
-
-jmpfilter <- jmprsquared %>% 
-    filter(var_long %in% c("Sewer", "Shared", "Improved") & rsq < 0.35)
-
-jmpfilter
+low_rsq <- jmp_measures_of_model_fit %>% 
+    group_by(var_short) %>% 
+    filter(r.squared < 0.20)
 
 ```
 
-# Plot linear fit of different countries: Shared/Sewer
 
-## OLS Regression : r squared < 0.30
+
+# Plot linear fit for different countries
+
+## OLS Regression : r squared \< 0.30
+
+::: columns
+::: {.column width="80%"}
 
 ```{r ols-regression, warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -202,7 +107,7 @@ plot1 <- jmp_all_mean_value %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
     labs(x = "year",
          y = "% coverage",
-         title = "AFG Sewer connection in rural and urban contexts")+
+         title = "Afghanistan Sewer connection in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -210,11 +115,11 @@ plot1 <- jmp_all_mean_value %>%
 
 
 plot2 <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
     labs(x = "year",
          y = "% coverage",
-         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+         title = "Tanzania Open defecation in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -224,19 +129,103 @@ grid.arrange(plot1, plot2)
 
 ```
 
+:::
+
+::: {.column width="20%"}
+-   Afghanistan r.sq rural = 0.0426018
+-   Afghanistan r.sq urban = 0.0170736
+-   Tanzania r.sq rural    = 0.1824534
+-   Tanzania r.sq urban    = 0.0296412	
+:::
+:::
+
+## OLS Regression : r squared \> 0.80
+
+```{r ols-regression, warning=FALSE, echo=FALSE, message=FALSE}
+
+library(gridExtra)
+
+plot1 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Sewer") & iso3 == "ARG") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Argentina Sewer connection in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+
+plot2 <- jmp_all_mean_value %>% 
+    filter(var_long %in% c("Improved") & iso3 == "BRA") %>%
+    ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
+    labs(x = "year",
+         y = "% coverage",
+         title = "Brazil Improved Sanitation in rural and urban contexts")+
+    theme_gray() +
+    theme(title = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12, face = "bold"))
+
+grid.arrange(plot1, plot2)
+
+```
+
+
+# Plotting Model coefficients
+
+## Model fit : R squared {auto-animate="true" auto-animate-easing="ease-in-out"}
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+
+
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = var_long, y = r.squared)) + geom_boxplot(fill = "blue") +
+    geom_jitter()+
+    facet_wrap(~residence)+
+    labs(title = "Model coefficients",
+         subtitle = "r.squared")
+
+
+
+
+```
+
+## Model fit : P value {auto-animate="true" auto-animate-easing="ease-in-out"}
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+jmp_measures_of_model_fit %>% 
+    ggplot(aes(x = var_long, y = p.value)) + geom_boxplot(fill = "blue") +  
+    geom_jitter()+  
+    facet_wrap(~residence)+
+    labs(title = "Model coefficients",
+         subtitle = "pvalue")
+
+    
+```
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
+
+jmpfilter <- jmprsquared %>% 
+    filter(var_long %in% c("Sewer", "Shared", "Improved") & rsq < 0.35)
+
+jmpfilter
+
+```
+
+
+
 # Alternative models
 
-- Fitting different models to the data to compare goodness of fit
-
-
+-   Fitting different models to the data to compare goodness of fit
 
 ```{r , warning=FALSE, include=FALSE, echo=FALSE, message=FALSE}
 # Fitting a polynomial of order 4
 
 
 poly4model <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
-    nest_by(iso3, residence, var_long) %>% 
+    nest_by(iso3, residence, var_short) %>% 
     mutate(model = list(lm(mean_value ~ poly(year,4, raw = TRUE), data = data)))
 
 
@@ -253,8 +242,7 @@ rsquared <- poly4model|>
 library(splines)
 
 splinemodel <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Sewer", "Shared", "Improved")) %>% 
-    nest_by(iso3, residence, var_long) %>% 
+    nest_by(iso3, residence, var_short) %>% 
     mutate(model = list(lm(mean_value ~ bs(year, knots = quantile(jmp_all_mean_value$year, p = c(0.25,0.5,0.75))), data = data)))
 
 
@@ -270,13 +258,17 @@ library(mgcv)
 library(kableExtra)
 library(gratia)
 
+foml <- mean_value ~ s(year, k=2, bs = "tp")
+
 GAMmodel <- jmp_all_mean_value %>% 
-    group_by(iso3, residence, var_long) %>% 
-    gam(mean_value ~ s(year, bs = "cs") , data = .)
+    group_by(iso3, residence, var_short) %>% 
+    nest() %>% 
+    mutate(model = map(data, ~mgcv::gam(formula = foml , data = ., na.action=na.omit))) 
 
 
-    
-summary(GAMmodel)
+ rsquared <- splinemodel|> 
+    summarise(rsq = summary(model)$r.squared)    
+
 
 tidy(GAMmodel) %>% kable()
     
@@ -288,9 +280,6 @@ jmp_all_mean_value %>% add_residuals(GAMmodel) %>% add_fitted(GAMmodel) %>% kabl
 
 ```{r , warning=FALSE, include=FALSE,echo=FALSE, message=FALSE, include=FALSE}
 #Loess
-
-
-
 
 loessmodel <- jmp_all_mean_value %>% 
     group_by(iso3, residence, var_long) %>%
@@ -306,9 +295,8 @@ augment(loessmodel, se_fit = TRUE) %>% kable() %>%  scroll_box(height = "200px")
 
 ## Plot using a 4th order polynomial
 
-:::: {.columns}
+::: columns
 ::: {.column width="80%"}
-
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
 plot3 <- jmp_all_mean_value %>% 
@@ -338,23 +326,18 @@ plot4 <- jmp_all_mean_value %>%
 grid.arrange(plot3,plot4)
 
 ```
-
 :::
 
 ::: {.column width="20%"}
-
-- Simple approach to model non-linear relationships
-- It adds polynomial terms or quadratic terms(square,cubes etc) to a regression
-
+-   Simple approach to model non-linear relationships
+-   It adds polynomial terms or quadratic terms(square,cubes etc) to a regression
 :::
-
-::::
+:::
 
 ## Plot using splines
 
-:::: {.columns}
+::: columns
 ::: {.column width="80%"}
-
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 plot5 <- jmp_all_mean_value %>% 
@@ -385,23 +368,18 @@ grid.arrange(plot5,plot6)
 
 
 ```
-
 :::
 
 ::: {.column width="20%"}
-
-- Fits a smooth curve with a series of polynomial segments
-- The values delimiting the spline segments are called knots
-
+-   Fits a smooth curve with a series of polynomial segments
+-   The values delimiting the spline segments are called knots
 :::
-
-::::
+:::
 
 ## Plot using GAM
 
-:::: {.columns}
+::: columns
 ::: {.column width="80%"}
-
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
 plot7 <- jmp_all_mean_value %>% 
@@ -432,24 +410,17 @@ plot8 <- jmp_all_mean_value %>%
 
 grid.arrange(plot7,plot8)
 ```
-
 :::
 
 ::: {.column width="20%"}
-
-- Fits spline models with automated selection of knots
-
-
+-   Fits spline models with automated selection of knots
 :::
-
-::::
-
+:::
 
 ## Plotting using LOESS
 
-:::: {.columns}
+::: columns
 ::: {.column width="80%"}
-
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 plot9 <- jmp_all_mean_value %>% 
@@ -479,14 +450,9 @@ plot10 <- jmp_all_mean_value %>%
 grid.arrange(plot9,plot10)
 
 ```
-
 :::
 
 ::: {.column width="20%"}
-
-- Also a smoothing technique but tends to be slow on large datasets
-
-
+-   Also a smoothing technique but tends to be slow on large datasets
 :::
-
-::::
+:::
