@@ -263,7 +263,7 @@ foml <- mean_value ~ s(year, k=2, bs = "tp")
 GAMmodel <- jmp_all_mean_value %>% 
     group_by(iso3, residence, var_short) %>% 
     nest() %>% 
-    mutate(model = map(data, ~mgcv::gam(formula = foml , data = ., na.action=na.omit))) 
+    mutate(model = map(data, ~mgcv::gam(formula = foml , data = ., na.omit = TRUE))) 
 
 
  rsquared <- splinemodel|> 
