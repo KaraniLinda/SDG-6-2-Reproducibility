@@ -356,10 +356,10 @@ grid.arrange(plot3,plot4)
 :::
 
 ::: {.column width="20%"}
--   Afghanistan r.sq rural = 0.686
--   Afghanistan r.sq urban = 0.842
--   Tanzania r.sq rural    = 0.1824534
--   Tanzania r.sq urban    = 0.0296412
+-   Afghanistan r.sq rural = 0.043
+-   Afghanistan r.sq urban = 0.022
+-   Tanzania r.sq rural    = 0.487
+-   Tanzania r.sq urban    = 0.033
 :::
 :::
 
@@ -382,12 +382,12 @@ plot5 <- jmp_all_mean_value %>%
     axis.title = element_text(size = 12, face = "bold"))
 
 plot6 <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))+
     labs(x = "year",
          y = "% coverage",
-         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+         title = "Tanzania Open defecation in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -400,8 +400,11 @@ grid.arrange(plot5,plot6)
 :::
 
 ::: {.column width="20%"}
--   Fits a smooth curve with a series of polynomial segments
--   The values delimiting the spline segments are called knots
+
+-   Afghanistan r.sq rural = 1.00
+-   Afghanistan r.sq urban = 1.00
+-   Tanzania r.sq rural    = 0.65
+-   Tanzania r.sq urban    = 0.37
 :::
 :::
 
