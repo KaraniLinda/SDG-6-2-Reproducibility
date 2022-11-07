@@ -205,14 +205,7 @@ jmp_measures_of_model_fit %>%
     
 ```
 
-```{r, warning=FALSE, echo=FALSE, message=FALSE, include=FALSE}
 
-jmpfilter <- jmprsquared %>% 
-    filter(var_long %in% c("Sewer", "Shared", "Improved") & rsq < 0.35)
-
-jmpfilter
-
-```
 
 
 
@@ -225,6 +218,7 @@ jmpfilter
 
 
 poly4model <- jmp_all_mean_value %>% 
+    filter(iso3  %in% c("AFG", "TZA")) %>% 
     nest_by(iso3, residence, var_short) %>% 
     mutate(model = list(lm(mean_value ~ poly(year,4, raw = TRUE), data = data)))
 
@@ -242,6 +236,7 @@ rsquared <- poly4model|>
 library(splines)
 
 splinemodel <- jmp_all_mean_value %>% 
+    filter(iso3  %in% c("AFG", "TZA")) %>% 
     nest_by(iso3, residence, var_short) %>% 
     mutate(model = list(lm(mean_value ~ bs(year, knots = quantile(jmp_all_mean_value$year, p = c(0.25,0.5,0.75))), data = data)))
 
@@ -258,36 +253,68 @@ library(mgcv)
 library(kableExtra)
 library(gratia)
 
-foml <- mean_value ~ s(year, k=2, bs = "tp")
-
-GAMmodel <- jmp_all_mean_value %>% 
-    group_by(iso3, residence, var_short) %>% 
-    nest() %>% 
-    mutate(model = map(data, ~mgcv::gam(formula = foml , data = ., na.omit = TRUE))) 
 
 
- rsquared <- splinemodel|> 
-    summarise(rsq = summary(model)$r.squared)    
-
-
-tidy(GAMmodel) %>% kable()
+gam_model <- jmp_all_mean_value %>% 
+    filter(iso3  %in% c("AFG", "TZA")) %>% 
+    group_by(iso3, residence, var_short) %>%
+    nest()
     
+##Create a function to fit the models    
+
+country_gam <- function(df) {
+    gam(mean_value ~ year, family=gaussian, data = df, na.omit=TRUE)
+    }
+    
+##Apply country loess to each element in our df
+
+gam_model <- gam_model %>% 
+    mutate(model = map(data, country_gam))
+
+#Add residuals to the model
+
+gam_model <- gam_model %>% 
+    mutate(
+        resids = map2(data, model, add_residuals))
+
+#unnest
+
+resids <- unnest(gam_model,resids)
+
+#Get statistics using glance
+
+gam_model %>% 
+    mutate(glance = map(model,broom::glance)) %>% 
+    unnest(glance)
+
+
 ```
 
-```{r, warning=FALSE,include=FALSE, echo=FALSE, message=FALSE}
-jmp_all_mean_value %>% add_residuals(GAMmodel) %>% add_fitted(GAMmodel) %>% kable() %>%  scroll_box(height = "200px")
-```
+
 
 ```{r , warning=FALSE, include=FALSE,echo=FALSE, message=FALSE, include=FALSE}
 #Loess
 
-loessmodel <- jmp_all_mean_value %>% 
-    group_by(iso3, residence, var_long) %>%
-    loess(mean_value ~ year, data = ., span = 0.5, degree = 2)
 
-summary(loessmodel)
 
-augment(loessmodel, se_fit = TRUE) %>% kable() %>%  scroll_box(height = "200px")
+loess_model <- jmp_all_mean_value %>% 
+    filter(iso3  %in% c("AFG", "TZA")) %>% 
+    group_by(iso3, residence, var_short) %>%
+    nest()
+    
+##Create a function to fit the models    
+
+country_loess <- function(df) {
+    loess(mean_value ~ year, data = df,span = 0.85, degree = 2, normalize = TRUE)
+    }
+    
+##Apply country loess to each element in our df
+
+loess_model <- loess_model %>% 
+    mutate(model = map(data, country_loess))
+
+loess_model$model
+
 
 ```
 
@@ -312,12 +339,12 @@ plot3 <- jmp_all_mean_value %>%
     axis.title = element_text(size = 12, face = "bold"))
 
 plot4 <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))+
     labs(x = "year",
          y = "% coverage",
-         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+         title = "Tanzania Open Defecation in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -329,8 +356,10 @@ grid.arrange(plot3,plot4)
 :::
 
 ::: {.column width="20%"}
--   Simple approach to model non-linear relationships
--   It adds polynomial terms or quadratic terms(square,cubes etc) to a regression
+-   Afghanistan r.sq rural = 0.686
+-   Afghanistan r.sq urban = 0.842
+-   Tanzania r.sq rural    = 0.1824534
+-   Tanzania r.sq urban    = 0.0296412
 :::
 :::
 
