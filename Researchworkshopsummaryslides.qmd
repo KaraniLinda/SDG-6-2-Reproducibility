@@ -145,7 +145,7 @@ grid.arrange(plot1, plot2)
 
 ## OLS Regression : r squared \> 0.80
 
-```{r ols-regression, warning=FALSE, echo=FALSE, message=FALSE}
+```{r ols-regression2, warning=FALSE, echo=FALSE, message=FALSE}
 
 library(gridExtra)
 

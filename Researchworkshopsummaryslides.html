@@ -5,9 +5,9 @@
 <script src="Researchworkshopsummaryslides_files/libs/quarto-html/popper.min.js"></script>
 <script src="Researchworkshopsummaryslides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="Researchworkshopsummaryslides_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Researchworkshopsummaryslides_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet">
+<link href="Researchworkshopsummaryslides_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="Researchworkshopsummaryslides_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-0.9.598">
+  <meta name="generator" content="quarto-1.1.189">
 
   <title>Research workshop summary slides</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,10 +18,15 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
   </style>
   <link rel="stylesheet" href="Researchworkshopsummaryslides_files/libs/revealjs/dist/theme/quarto.css" id="theme">
   <link rel="stylesheet" href="theme/theme.css">
@@ -313,21 +318,13 @@
       margin-right: 0; 
     }
   </style>
-  
-  <script src="Researchworkshopsummaryslides_files/libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="Researchworkshopsummaryslides_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
-<body>
+<body class="quarto-dark">
   <div class="reveal">
     <div class="slides">
 
 <section id="title-slide" class="center">
   <h1 class="title">Research workshop summary slides</h1>
-</section>
-
-<section id="data-science-workshop" class="title-slide slide level1 center">
-<h1>DATA SCIENCE WORKSHOP</h1>
-
 </section>
 
 <section>
@@ -344,46 +341,68 @@
 </ul>
 <p>Master Thesis Project</p>
 <ul>
-<li>Input: Data Package</li>
-<li>Status</li>
-<li>What has worked? What hasn’t?</li>
-<li>Plots exploring the statistics</li>
-<li>Recommendations</li>
-<li>Gaps</li>
-<li>Learning</li>
+<li>Fit models for estimates -Prepare primary indicators estimates based on JMP estimation rules -Prepare secondary indicator service levels</li>
+<li>Extract r squared and p-values from models -Identify those with low values &lt; 0.20 and high values &gt; 0.80 -Plots exploring the OLS regression using two countries with low and high rsq values</li>
+<li>Plots showing the model fit coefficients(r.squared and p value)</li>
+<li>Fit alternative models and assess goodness of fit</li>
 <li>Next steps</li>
 </ul>
-<div class="cell">
-
-</div>
 </section>
-<section id="project-outline" class="slide level2">
-<h2>Project outline</h2>
-<p>Introduction</p>
-<p>Methods</p>
-<p>Results</p>
-<ul>
-<li>Linear regression: Comparison of primary estimates with JMP Estimates</li>
-<li>Measures of goodness of fit: How well does the model fit the data for different countries?(R squared, pvalue)</li>
-<li>Alternative models: Moving beyond linearity</li>
-</ul>
-<p>Discussion</p>
-<p>Conclusion and recommendations</p>
-</section>
-<section id="masters-thesis-progress" class="slide level2">
-<h2>Masters thesis progress</h2>
+<section id="masters-thesis-otline" class="slide level2">
+<h2>Masters thesis otline</h2>
 <div>
 <p>Objectives</p>
 <ul>
-<li class="fragment">Generate sanitation estimates from raw packaged data using documented methods</li>
+<li class="fragment">Generate sanitation estimates for rural and urban from raw packaged data using documented methods
+<ul>
+<li class="fragment">only the primary indicators and derived secondary service levels:
+<ul>
+<li class="fragment">basic sanitation service</li>
+<li class="fragment">limited sanitation service</li>
+<li class="fragment">unimproved sanitation service</li>
+<li class="fragment">no sanitation service</li>
+</ul></li>
+</ul></li>
 <li class="fragment">Fit different statistical models to assess goodness of fit</li>
 </ul>
 <p>Status</p>
 <ul>
-<li class="fragment">Managed to derive estimates for the primary indicators</li>
+<li class="fragment">Managed to derive estimates for the primary indicators and derived secondary service levels</li>
 </ul>
 </div>
+<div class="cell">
+
+</div>
 </section></section>
+<section>
+<section id="plot-linear-fit-for-different-countries" class="title-slide slide level1 center">
+<h1>Plot linear fit for different countries</h1>
+
+</section>
+<section id="ols-regression-r-squared-0.30" class="slide level2">
+<h2>OLS Regression : r squared &lt; 0.30</h2>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Afghanistan r.sq rural = 0.0426018</li>
+<li>Afghanistan r.sq urban = 0.0170736</li>
+<li>Tanzania r.sq rural = 0.1824534</li>
+<li>Tanzania r.sq urban = 0.0296412<br>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="ols-regression-r-squared-0.80" class="slide level2">
+<h2>OLS Regression : r squared &gt; 0.80</h2>
+
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression2-1.png" width="960" class="r-stretch"></section></section>
 <section>
 <section id="plotting-model-coefficients" class="title-slide slide level1 center">
 <h1>Plotting Model coefficients</h1>
@@ -397,15 +416,6 @@
 <h2 data-id="quarto-animate-title">Model fit : P value</h2>
 
 <img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch"></section></section>
-<section>
-<section id="plot-linear-fit-of-different-countries-sharedsewer" class="title-slide slide level1 center">
-<h1>Plot linear fit of different countries: Shared/Sewer</h1>
-
-</section>
-<section id="ols-regression-r-squared-0.30" class="slide level2">
-<h2>OLS Regression : r squared &lt; 0.30</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression-1.png" width="960" class="r-stretch"></section></section>
 <section id="alternative-models" class="title-slide slide level1 center">
 <h1>Alternative models</h1>
 <ul>
@@ -424,13 +434,15 @@
 <div class="column" style="width:80%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-12-1.png" width="960"></p>
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-10-1.png" width="960"></p>
 </div>
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Simple approach to model non-linear relationships</li>
-<li>It adds polynomial terms or quadratic terms(square,cubes etc) to a regression</li>
+<li>Afghanistan r.sq rural = 0.043</li>
+<li>Afghanistan r.sq urban = 0.022</li>
+<li>Tanzania r.sq rural = 0.487</li>
+<li>Tanzania r.sq urban = 0.033</li>
 </ul>
 </div>
 </div>
@@ -441,13 +453,15 @@
 <div class="column" style="width:80%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-11-1.png" width="960"></p>
 </div>
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Fits a smooth curve with a series of polynomial segments</li>
-<li>The values delimiting the spline segments are called knots</li>
+<li>Afghanistan r.sq rural = 1.00</li>
+<li>Afghanistan r.sq urban = 1.00</li>
+<li>Tanzania r.sq rural = 0.65</li>
+<li>Tanzania r.sq urban = 0.37</li>
 </ul>
 </div>
 </div>
@@ -458,7 +472,7 @@
 <div class="column" style="width:80%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-14-1.png" width="960"></p>
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-12-1.png" width="960"></p>
 </div>
 </div>
 </div><div class="column" style="width:20%;">
@@ -474,7 +488,7 @@
 <div class="column" style="width:80%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-15-1.png" width="960"></p>
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
 </div>
 </div>
 </div><div class="column" style="width:20%;">
@@ -513,13 +527,13 @@
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': false,
-'smaller': false,
+'smaller': true,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
-'smaller': false,
+'smaller': true,
  
         // Display controls in the bottom right corner
         controls: false,
@@ -742,6 +756,24 @@
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
       const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
       tabsets.forEach(function(tabset) {
         const tabby = new Tabby('#' + tabset.id);
@@ -790,7 +822,8 @@
       for (var i=0; i<noterefs.length; i++) {
         const ref = noterefs[i];
         tippyHover(ref, function() {
-          let href = ref.getAttribute('href');
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
