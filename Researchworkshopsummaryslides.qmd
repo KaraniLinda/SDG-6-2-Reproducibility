@@ -22,10 +22,14 @@ Raw data package documentation (proof-of-concept website)
 
 Master Thesis Project
 
--   Reproducing the sanitation estimates
--   Plots exploring the OLS regression
--   Plots showing the model fit coefficients
--   Alternative models and coefficients
+-   Fit models for estimates
+        -Prepare primary indicators estimates based on JMP estimation rules
+        -Prepare secondary indicator service levels
+-   Extract r squared and p-values from models
+        -Identify those with low values < 0.20 and high values > 0.80
+        -Plots exploring the OLS regression using two countries with low and high rsq values
+-   Plots showing the model fit coefficients(r.squared and p value)
+-   Fit alternative models and assess goodness of fit
 -   Next steps
 
 ```{r, include=FALSE, message=FALSE, warning=FALSE}
@@ -145,7 +149,7 @@ grid.arrange(plot1, plot2)
 
 library(gridExtra)
 
-plot1 <- jmp_all_mean_value %>% 
+plot11 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "ARG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
     labs(x = "year",
@@ -157,7 +161,7 @@ plot1 <- jmp_all_mean_value %>%
     axis.title = element_text(size = 12, face = "bold"))
 
 
-plot2 <- jmp_all_mean_value %>% 
+plot21 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Improved") & iso3 == "BRA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +geom_smooth(method = "lm", se = FALSE)+
     labs(x = "year",
@@ -428,7 +432,7 @@ plot7 <- jmp_all_mean_value %>%
 
 
 plot8 <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
     labs(x = "year",
@@ -468,7 +472,7 @@ plot9 <- jmp_all_mean_value %>%
     axis.title = element_text(size = 12, face = "bold"))
 
 plot10 <- jmp_all_mean_value %>% 
-    filter(var_long %in% c("Improved") & iso3 == "ZWE") %>%
+    filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = loess, span = 0.90)+
     labs(x = "year",
