@@ -12,6 +12,8 @@ format:
        css: ["theme/theme.css"]
        theme: moon
        echo: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Agenda
@@ -35,6 +37,9 @@ format:
 library(tidyverse)
 library(modelr)
 library(broom)
+library(maps)
+library(tmap) 
+library(sf)
 
 ```
 
@@ -42,14 +47,204 @@ library(broom)
 #Getting data
 
 #jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
-jmpraw <- read_csv("https://raw.githubusercontent.com/larnsce/washr/master/data/derived_data/2022-10-18_jmp_sanitation_raw_data.csv")
+jmpraw <- read_rds("data/2022-10-19_jmp_sanitation_raw_data.rds")
 
 jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
 
 jmp_all_mean_value <-read_csv(here::here("data/derived/jmp_all_mean_estimates.csv"))
 ```
 
+```{r}
+# Functions
+
+top10 <- function(data) {
+    data  %>% 
+        arrange(desc(n)) %>% 
+        head(10)  %>% 
+        mutate(country = countrycode::countrycode(iso3, origin = "iso3c", destination = "country.name")) %>% 
+        select(country, n)
+}
+
+# Data Manipulation
+
+jmp_iso3_frequency <- jmpraw %>% 
+    count(iso3)
+
+jmp_iso3_user_interface_2015 <- jmpraw %>% 
+    filter(year >= 2015) %>% 
+    filter(san_service_chain == "user interface") %>% 
+    count(iso3, san_service_chain)
+
+jmp_iso3_emptying_2015 <- jmpraw %>% 
+    filter(year >= 2015) %>% 
+    filter(san_service_chain == "emptying") %>% 
+    count(iso3, san_service_chain)
+
+jmp_iso3_ww_treatment_2015 <- jmpraw %>% 
+    filter(year >= 2015) %>% 
+    filter(san_service_chain == "WW treatment") %>% 
+    count(iso3, san_service_chain)
+
+jmp_iso3_fs_treatment_2015 <- jmpraw %>% 
+    filter(year >= 2015) %>% 
+    filter(san_service_chain == "FS treatment") %>% 
+    count(iso3, san_service_chain)
+
+
+data("World")
+
+world_moll = st_transform(World, crs = "+proj=moll")
+
+tmap_mode("view")
+
+tmap_options(basemaps = "OpenStreetMap")
+
+tmap_mode("plot")
+```
+
+
 # R Package Development {background-color="#eee8d5"}
+
+## R Data Package - Benefits
+
+- Data accessible as a single table for any analysis tool
+- Data can be imported to R using one command
+- Public website with detailed documentation
+    _ e.g. `washdata` R Package [https://katilingban.io/washdata/index.html](https://katilingban.io/washdata/index.html)
+
+## R Data Package - Sanitation {.smaller}
+
+- Data in long format (19,528 rows)
+- 9 variables
+
+```{r}
+
+jmpraw %>% 
+    relocate(iso3) %>%
+    relocate(value, .after = san_service_chain) %>% 
+    head(4) %>% 
+    knitr::kable(digits = 1)
+
+```
+
+## R Data Package - New Variables {.smaller}
+
+- `residence`: urban/rural/national
+- `san_service_chain` (Sanitation Service Chain):
+
+```{r}
+
+jmpraw %>% 
+    count(san_service_chain) %>% 
+    knitr::kable()
+
+```
+
+## R Data Package - Use Cases {.smaller auto-animate="true"}
+
+::: {.incremental}
+
+1. Using JMP methods to reproduce estimates and apply different models (Linda Karani - MSc Data Science)
+
+2. Writing an R Package with a function to produce estimates (and a function to produce service ladder plots) 
+
+
+```{r}
+#| eval: false
+#| echo: true
+#| fenced: true
+
+```
+
+:::
+
+## R Data Package - Use Cases {.smaller auto-animate="true"}
+
+1. Using JMP methods to reproduce estimates and apply different models (Linda Karani - MSc Data Science)
+
+2. Writing an R Package with a function to produce estimates (and a function to produce service ladder plots) 
+
+```{r}
+#| eval: false
+#| echo: true
+#| fenced: true
+
+estimate(iso3 = "AFG",           # default: all iso3 codes
+         year = 2010:2030,       # Single year or range of years
+         var_short = NULL,       # default: all variables (NULL)
+         residence = "national") # default: national
+
+```
+
+
+## R Data Package - Use Cases {.smaller auto-animate="true"}
+
+1. Using JMP methods to reproduce estimates and apply different models (Linda Karani - MSc Data Science)
+
+2. Writing an R Package with a function to produce estimates (and a function to produce service ladder plots) 
+
+```{r}
+#| eval: false
+#| echo: true
+#| fenced: true
+
+estimate(iso3 = "AFG",           # default: all iso3 codes
+         year = 2010:2030,       # Single year or range of years
+         var_short = NULL,       # default: all variables (NULL)
+         residence = "national") # default: national
+
+```
+
+3. Great potential for unforeseen use cases enabled by making the data readily accessible (research, teaching, joining with other data, etc.)
+
+## 
+
+```{r}
+
+world_moll %>% 
+    left_join(jmp_iso3_emptying_2015, by = c("iso_a3" = "iso3")) %>% 
+    filter(continent != "Antarctica") %>% 
+    tm_shape() +
+    tm_polygons(
+        col = "n", 
+        title = "No. of data points",
+        #legend.hist = TRUE,
+        #palette = "Oranges", 
+        style = "fixed",
+        contrast = c(0.1, 1),
+        breaks = c(1, 11, 21, 31),
+        #n = 4, 
+        textNA = "No Data",
+        colorNA = "grey90", 
+        lwd = 0.5
+    ) +
+    tm_layout(
+        main.title = "JMP raw data collection - Number of data points for 'emptying' since 2015",
+        main.title.position = "center",
+        title.position = c("left", "top"),
+        #legend.outside = TRUE,
+        scale = 1.5,
+        #inner.margins = c(0, .02, .02, .02),
+        #outer.margins = c(0, 0, 0, 0), frame = TRUE, 
+    ) 
+
+```
+
+##
+
+```{r}
+top10(jmp_iso3_emptying_2015) %>% 
+    knitr::kable(caption = "JMP raw data collection: Number of data points for 'emptying' since 2015")
+```
+
+## R Data Package - What's next?
+
+- Submission of proposal for further development to [ORD (Open Research Data) Programme of ETH Domain](https://ethrat.ch/wp-content/uploads/2022/10/Application-guidelines_TrackC-Contribute-projects-3rd-call-1.pdf) (15k in-kind + 15k ETH Board), due: 12th December
+- Submission of a proposal to Colorado WASH Symposium (focus on Linda's work), due: 25th November
+
+::: {.aside}
+https://ethrat.ch/wp-content/uploads/2022/10/Application-guidelines_TrackC-Contribute-projects-3rd-call-1.pdf
+::: 
 
 # Master Thesis Project {background-color="#eee8d5"}
 
@@ -303,14 +498,13 @@ rsquared <- splinemodel|>
 
 ```
 
-```{r , warning=FALSE,include=FALSE, echo=FALSE, message=FALSE}
+```{r, warning=FALSE, include=FALSE, echo=FALSE, message=FALSE, eval=FALSE}
+
 # Generalized Additive Model
 
 library(mgcv)
 library(kableExtra)
 library(gratia)
-
-
 
 gam_model <- jmp_all_mean_value %>% 
     filter(iso3  %in% c("AFG", "TZA")) %>% 
@@ -349,7 +543,7 @@ gam_model %>%
 
 
 
-```{r , warning=FALSE, include=FALSE,echo=FALSE, message=FALSE, include=FALSE}
+```{r , warning=FALSE, include=FALSE,echo=FALSE, message=FALSE, include=FALSE, eval=FALSE}
 #Loess
 
 
@@ -518,7 +712,7 @@ plot6
 plot7 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
+    stat_smooth(method = "gam", formula =  y ~ s(x, k=3))+
     labs(x = "year",
          y = "% coverage",
          title = "AFG Sewer connection in rural and urban contexts")+
@@ -528,6 +722,8 @@ plot7 <- jmp_all_mean_value %>%
     axis.title = element_text(size = 12, face = "bold"))
 
 plot7
+
+?stat_smooth
 ```
 
 :::
@@ -552,7 +748,7 @@ plot7
 plot8 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
-    stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
+    stat_smooth(method = "gam", formula =  y ~ s(x, k=3))+
     labs(x = "year",
          y = "% coverage",
          title = "Tanzania open defecation in rural and urban contexts")+
@@ -608,8 +804,6 @@ plot9
 :::
 :::
 
-
-
 ## Tanzania open defecation
 
 ::: columns
@@ -639,3 +833,27 @@ plot10
 -   Tanzania RSE urban = 0.033
 :::
 :::
+
+# Discussion {background-color="#eee8d5"}
+
+## Questions
+
+1. How are country files updated on the server? 
+    - How often? All together, or one by one as there is new data?
+
+2. The current database for raw data shows 379 different sources. They are all abbreviated. Do you have a table where all these abbreviations are spelled out?
+
+3. Ratio RS1
+
+> "Other ratios used for 'basic' indicators (RW1, RS1) are calculated using simple averages" - JMP Methodology, March 2018
+
+# Thanks
+
+## Thanks!
+
+**Data source:** washdata.org
+
+**Slides - source code:** https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/Researchworkshopsummaryslides.qmd
+
+**Slides - PDF download:** 
+
