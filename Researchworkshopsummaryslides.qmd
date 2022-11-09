@@ -23,11 +23,11 @@ Raw data package documentation (proof-of-concept website)
 Master Thesis Project
 
 -   Fit models for estimates
-        -Prepare primary indicators estimates based on JMP estimation rules
-        -Prepare secondary indicator service levels
+        - Prepare primary indicators estimates based on JMP estimation rules
+        - Prepare secondary indicator service levels
 -   Extract r squared and p-values from models
-        -Identify those with low values < 0.20 and high values > 0.80
-        -Plots exploring the OLS regression using two countries with low and high rsq values
+        - Identify those with low values < 0.20 and high values > 0.80
+        - Plots exploring the OLS regression using two countries with low and high rsq values
 -   Plots showing the model fit coefficients(r.squared and p value)
 -   Fit alternative models and assess goodness of fit
 -   Next steps
@@ -97,14 +97,13 @@ low_rsq <- jmp_measures_of_model_fit %>%
 
 # Plot linear fit for different countries
 
-## OLS Regression : r squared \< 0.30
+## OLS Regression : r squared \< 0.20
 
 ::: columns
 ::: {.column width="80%"}
 
 ```{r ols-regression, warning=FALSE, echo=FALSE, message=FALSE}
 
-library(gridExtra)
 
 plot1 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
@@ -117,6 +116,25 @@ plot1 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
+plot1
+
+
+
+```
+:::
+
+::: {.column width="20%"}
+-   Afghanistan r.sq rural = 0.0426018
+-   Afghanistan r.sq urban = 0.0170736
+:::
+:::
+
+
+
+::: columns
+::: {.column width="80%"}
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
 plot2 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
@@ -129,25 +147,28 @@ plot2 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
-grid.arrange(plot1, plot2)
+plot2
 
 ```
 
 :::
 
 ::: {.column width="20%"}
--   Afghanistan r.sq rural = 0.0426018
--   Afghanistan r.sq urban = 0.0170736
+
 -   Tanzania r.sq rural    = 0.1824534
 -   Tanzania r.sq urban    = 0.0296412	
 :::
 :::
 
 ## OLS Regression : r squared \> 0.80
+### Argentina Sewer connection OLS regression
+
+::: columns
+::: {.column width="80%"}
 
 ```{r ols-regression2, warning=FALSE, echo=FALSE, message=FALSE}
 
-library(gridExtra)
+
 
 plot11 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "ARG") %>%
@@ -160,6 +181,23 @@ plot11 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
+plot11
+
+
+```
+:::
+
+::: {.column width="20%"}
+-   Argentina r.sq rural = 0.82
+-   Argentina r.sq urban = 0.87
+:::
+:::
+
+::: columns
+::: {.column width="80%"}
+
+### Brazil Improved sanitation OLS regression
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 plot21 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Improved") & iso3 == "BRA") %>%
@@ -172,9 +210,17 @@ plot21 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
-grid.arrange(plot1, plot2)
+plot21
 
 ```
+
+:::
+
+::: {.column width="20%"}
+-   Brazil r.sq rural = 0.90
+-   Brazil r.sq urban = 0.87
+:::
+:::
 
 
 # Plotting Model coefficients
@@ -186,9 +232,9 @@ grid.arrange(plot1, plot2)
 
 jmp_measures_of_model_fit %>% 
     ggplot(aes(x = var_long, y = r.squared)) + geom_boxplot(fill = "blue") +
-    geom_jitter()+
+    geom_jitter(width = 0.2)+
     facet_wrap(~residence)+
-    labs(title = "Model coefficients",
+    labs(title = "Model coefficients", x = "Primary indicator",
          subtitle = "r.squared")
 
 
@@ -201,9 +247,9 @@ jmp_measures_of_model_fit %>%
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 jmp_measures_of_model_fit %>% 
     ggplot(aes(x = var_long, y = p.value)) + geom_boxplot(fill = "blue") +  
-    geom_jitter()+  
+    geom_jitter(width = 0.2)+  
     facet_wrap(~residence)+
-    labs(title = "Model coefficients",
+    labs(title = "Model coefficients", x = "Primary indicator",
          subtitle = "pvalue")
 
     
@@ -325,11 +371,11 @@ loess_model$model
 # Plots
 
 ## Plot using a 4th order polynomial
+### Afghanistan Sewer connection
 
 ::: columns
 ::: {.column width="80%"}
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
-
 plot3 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -341,6 +387,21 @@ plot3 <- jmp_all_mean_value %>%
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
+```
+
+:::
+
+::: {.column width="20%"}
+-   Afghanistan r.sq rural = 0.043
+-   Afghanistan r.sq urban = 0.022
+-   Tanzania r.sq rural    = 0.487
+-   Tanzania r.sq urban    = 0.033
+:::
+:::
+
+
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
 plot4 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
@@ -354,7 +415,7 @@ plot4 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
-grid.arrange(plot3,plot4)
+plot4
 
 ```
 :::
