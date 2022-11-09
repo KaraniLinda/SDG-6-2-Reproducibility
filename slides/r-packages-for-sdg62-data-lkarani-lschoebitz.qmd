@@ -855,5 +855,5 @@ plot10
 
 **Slides - source code:** https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/slides/r-packages-for-sdg62-data-lkarani-lschoebitz.qmd
 
-**Slides - PDF download:** 
+**Slides - PDF download:** https://github.com/KaraniLinda/SDG-6-2-Reproducibility/raw/main/slides/r-packages-for-sdg62-data-lkarani-lschoebitz.pdf
 
