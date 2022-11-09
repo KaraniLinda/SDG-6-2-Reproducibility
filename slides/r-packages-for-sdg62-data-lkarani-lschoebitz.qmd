@@ -853,7 +853,7 @@ plot10
 
 **Data source:** washdata.org
 
-**Slides - source code:** https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/Researchworkshopsummaryslides.qmd
+**Slides - source code:** https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/slides/r-packages-for-sdg62-data-lkarani-lschoebitz.qmd
 
 **Slides - PDF download:** 
 
