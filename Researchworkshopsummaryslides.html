@@ -9,7 +9,9 @@
 <link href="Researchworkshopsummaryslides_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.1.189">
 
-  <title>Research workshop summary slides</title>
+  <meta name="author" content="Linda Karani">
+  <meta name="author" content="Lars Schöbitz">
+  <title>R Packages for SDG 6.2 data</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -324,34 +326,49 @@
     <div class="slides">
 
 <section id="title-slide" class="center">
-  <h1 class="title">Research workshop summary slides</h1>
+  <h1 class="title">R Packages for SDG 6.2 data</h1>
+  <p class="subtitle">Development and MSc Data Science project</p>
+  <p class="author">Linda Karani</p>
+  <p class="author">Lars Schöbitz</p>
 </section>
 
-<section>
-<section id="sdg-6.2-reproducibility" class="title-slide slide level1 center">
-<h1>SDG 6.2 Reproducibility</h1>
-
-</section>
-<section id="agenda" class="slide level2 smaller">
+<section id="agenda" class="slide level2">
 <h2>Agenda</h2>
-<p>Overall vision (raw data, estimates code, jmp estimates package)</p>
-<p>Raw data package documentation (proof-of-concept website)</p>
+<ol type="1">
+<li>R Package Development</li>
+<li>Master Thesis Project
 <ul>
-<li>Statistics of the raw data</li>
-</ul>
-<p>Master Thesis Project</p>
+<li>Fit models for estimates
 <ul>
-<li>Fit models for estimates -Prepare primary indicators estimates based on JMP estimation rules -Prepare secondary indicator service levels</li>
-<li>Extract r squared and p-values from models -Identify those with low values &lt; 0.20 and high values &gt; 0.80 -Plots exploring the OLS regression using two countries with low and high rsq values</li>
+<li>Prepare primary indicators estimates based on JMP estimation rules</li>
+<li>Prepare secondary indicator service levels</li>
+</ul></li>
+<li>Extract r squared and p-values from models
+<ul>
+<li>Identify those with low values &lt; 0.20 and high values &gt; 0.80</li>
+<li>Plots exploring the OLS regression using two countries with low and high rsq values</li>
+</ul></li>
 <li>Plots showing the model fit coefficients(r.squared and p value)</li>
 <li>Fit alternative models and assess goodness of fit</li>
 <li>Next steps</li>
-</ul>
+</ul></li>
+<li>Questions for Discussion</li>
+</ol>
 </section>
-<section id="masters-thesis-otline" class="slide level2">
-<h2>Masters thesis otline</h2>
+<section id="r-package-development" class="title-slide slide level1 center" data-background-color="#eee8d5">
+<h1>R Package Development</h1>
+
+</section>
+
+<section>
+<section id="master-thesis-project" class="title-slide slide level1 center" data-background-color="#eee8d5">
+<h1>Master Thesis Project</h1>
+
+</section>
+<section id="masters-thesis-outline" class="slide level2">
+<h2>Masters thesis outline</h2>
 <div>
-<p>Objectives</p>
+<h3 id="objectives">Objectives</h3>
 <ul>
 <li class="fragment">Generate sanitation estimates for rural and urban from raw packaged data using documented methods
 <ul>
@@ -365,7 +382,7 @@
 </ul></li>
 <li class="fragment">Fit different statistical models to assess goodness of fit</li>
 </ul>
-<p>Status</p>
+<h3 id="status">Status</h3>
 <ul>
 <li class="fragment">Managed to derive estimates for the primary indicators and derived secondary service levels</li>
 </ul>
@@ -388,6 +405,15 @@
 <p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression-1.png" width="960"></p>
 </div>
 </div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Afghanistan r.sq rural = 0.0426018</li>
+<li>Afghanistan r.sq urban = 0.0170736</li>
+</ul>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:80%;">
 <div class="cell">
 <div class="cell-output-display">
 <p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-4-1.png" width="960"></p>
@@ -395,8 +421,6 @@
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Afghanistan r.sq rural = 0.0426018</li>
-<li>Afghanistan r.sq urban = 0.0170736</li>
 <li>Tanzania r.sq rural = 0.1824534</li>
 <li>Tanzania r.sq urban = 0.0296412<br>
 </li>
@@ -406,8 +430,37 @@
 </section>
 <section id="ols-regression-r-squared-0.80" class="slide level2">
 <h2>OLS Regression : r squared &gt; 0.80</h2>
-
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression2-1.png" width="960" class="r-stretch"></section></section>
+<h3 id="argentina-sewer-connection-ols-regression">Argentina Sewer connection OLS regression</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/ols-regression2-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Argentina r.sq rural = 0.82</li>
+<li>Argentina r.sq urban = 0.87</li>
+</ul>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:80%;">
+<h3 id="brazil-improved-sanitation-ols-regression">Brazil Improved sanitation OLS regression</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-5-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Brazil r.sq rural = 0.90</li>
+<li>Brazil r.sq urban = 0.87</li>
+</ul>
+</div>
+</div>
+</section></section>
 <section>
 <section id="plotting-model-coefficients" class="title-slide slide level1 center">
 <h1>Plotting Model coefficients</h1>
@@ -416,11 +469,11 @@
 <section id="model-fit-r-squared" class="slide level2" data-auto-animate="true" data-auto-animate-easing="ease-in-out">
 <h2 data-id="quarto-animate-title">Model fit : R squared</h2>
 
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-5-1.png" width="960" class="r-stretch"></section>
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
 <section id="model-fit-p-value" class="slide level2" data-auto-animate="true" data-auto-animate-easing="ease-in-out">
 <h2 data-id="quarto-animate-title">Model fit : P value</h2>
 
-<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section></section>
+<img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch"></section></section>
 <section id="alternative-models" class="title-slide slide level1 center">
 <h1>Alternative models</h1>
 <ul>
@@ -435,25 +488,7 @@
 </section>
 <section id="plot-using-a-4th-order-polynomial" class="slide level2">
 <h2>Plot using a 4th order polynomial</h2>
-<div class="columns">
-<div class="column" style="width:80%;">
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-11-1.png" width="960"></p>
-</div>
-</div>
-</div><div class="column" style="width:20%;">
-<ul>
-<li>Afghanistan r.sq rural = 0.043</li>
-<li>Afghanistan r.sq urban = 0.022</li>
-<li>Tanzania r.sq rural = 0.487</li>
-<li>Tanzania r.sq urban = 0.033</li>
-</ul>
-</div>
-</div>
-</section>
-<section id="plot-using-splines" class="slide level2">
-<h2>Plot using splines</h2>
+<h3 id="afghanistan-sewer-connection">Afghanistan Sewer connection</h3>
 <div class="columns">
 <div class="column" style="width:80%;">
 <div class="cell">
@@ -463,16 +498,12 @@
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Afghanistan r.sq rural = 1.00</li>
-<li>Afghanistan r.sq urban = 1.00</li>
-<li>Tanzania r.sq rural = 0.65</li>
-<li>Tanzania r.sq urban = 0.37</li>
+<li>Afghanistan r.sq rural = 0.043</li>
+<li>Afghanistan r.sq urban = 0.022</li>
 </ul>
 </div>
 </div>
-</section>
-<section id="plot-using-gam" class="slide level2">
-<h2>Plot using GAM</h2>
+<h3 id="tanzania-open-defecation">Tanzania open defecation</h3>
 <div class="columns">
 <div class="column" style="width:80%;">
 <div class="cell">
@@ -482,13 +513,15 @@
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Fits spline models with automated selection of knots</li>
+<li>Tanzania r.sq rural = 0.487</li>
+<li>Tanzania r.sq urban = 0.033</li>
 </ul>
 </div>
 </div>
 </section>
-<section id="plotting-using-loess" class="slide level2">
-<h2>Plotting using LOESS</h2>
+<section id="plot-using-splines" class="slide level2">
+<h2>Plot using splines</h2>
+<h3 id="afghanistan-sewer-connection-1">Afghanistan sewer connection</h3>
 <div class="columns">
 <div class="column" style="width:80%;">
 <div class="cell">
@@ -498,7 +531,89 @@
 </div>
 </div><div class="column" style="width:20%;">
 <ul>
-<li>Also a smoothing technique but tends to be slow on large datasets</li>
+<li>Afghanistan r.sq rural = 1.00</li>
+<li>Afghanistan r.sq urban = 1.00</li>
+</ul>
+</div>
+</div>
+<h3 id="tanzania-open-defecation-1">Tanzania Open defecation</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-15-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Tanzania r.sq rural = 0.65</li>
+<li>Tanzania r.sq urban = 0.37</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="plot-using-gam" class="slide level2">
+<h2>Plot using GAM</h2>
+<h3 id="afghanistan-sewer-connection-2">Afghanistan sewer connection</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-16-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Afghanistan BIC rural = 18.5</li>
+<li>Afghanistan BIC urban = 36.1</li>
+</ul>
+</div>
+</div>
+<h3 id="tanzania-open-defecation-2">Tanzania open defecation</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-17-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Tanzania BIC rural = 87.6</li>
+<li>Tanzania BIC urban = 49.2</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="plotting-using-loess" class="slide level2">
+<h2>Plotting using LOESS</h2>
+<h3 id="afghanistan-sewer-connection-3">Afghanistan sewer connection</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-18-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Afghanistan RSE rural = 0.043</li>
+<li>Afghanistan RSE urban = 0.022</li>
+</ul>
+</div>
+</div>
+<h3 id="tanzania-open-defecation-3">Tanzania open defecation</h3>
+<div class="columns">
+<div class="column" style="width:80%;">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="Researchworkshopsummaryslides_files/figure-revealjs/unnamed-chunk-19-1.png" width="960"></p>
+</div>
+</div>
+</div><div class="column" style="width:20%;">
+<ul>
+<li>Tanzania RSE rural = 0.487</li>
+<li>Tanzania RSE urban = 0.033</li>
 </ul>
 </div>
 </div>

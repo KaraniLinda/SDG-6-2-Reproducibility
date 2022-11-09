@@ -1,5 +1,9 @@
 ---
-title: "Research workshop summary slides"
+title: "R Packages for SDG 6.2 data"
+subtitle: "Development and MSc Data Science project"
+author: 
+    - Linda Karani
+    - Lars Schöbitz
 format: 
    revealjs:
        smaller: true
@@ -10,27 +14,20 @@ format:
        echo: false
 ---
 
-# SDG 6.2 Reproducibility
+## Agenda
 
-## Agenda {.smaller}
-
-Overall vision (raw data, estimates code, jmp estimates package)
-
-Raw data package documentation (proof-of-concept website)
-
--   Statistics of the raw data
-
-Master Thesis Project
-
--   Fit models for estimates
+1. R Package Development
+2. Master Thesis Project
+    - Fit models for estimates
         - Prepare primary indicators estimates based on JMP estimation rules
         - Prepare secondary indicator service levels
--   Extract r squared and p-values from models
+    - Extract r squared and p-values from models
         - Identify those with low values < 0.20 and high values > 0.80
         - Plots exploring the OLS regression using two countries with low and high rsq values
--   Plots showing the model fit coefficients(r.squared and p value)
--   Fit alternative models and assess goodness of fit
--   Next steps
+    - Plots showing the model fit coefficients(r.squared and p value)
+    - Fit alternative models and assess goodness of fit
+    - Next steps
+3. Questions for Discussion
 
 ```{r, include=FALSE, message=FALSE, warning=FALSE}
 #Loading necessary libraries
@@ -52,11 +49,15 @@ jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indic
 jmp_all_mean_value <-read_csv(here::here("data/derived/jmp_all_mean_estimates.csv"))
 ```
 
-## Masters thesis otline
+# R Package Development {background-color="#eee8d5"}
+
+# Master Thesis Project {background-color="#eee8d5"}
+
+## Masters thesis outline
 
 ::: incremental
 
-Objectives
+### Objectives
 
 - Generate sanitation estimates for rural and urban from raw packaged data using documented methods
      - only the primary indicators and derived secondary service levels:
@@ -67,15 +68,12 @@ Objectives
 
 - Fit different statistical models to assess goodness of fit
 
-Status
+### Status
 
 - Managed to derive estimates for the primary indicators and derived secondary
 service levels
 
 :::
-
-
-
 
 
 ```{r}
@@ -92,8 +90,6 @@ low_rsq <- jmp_measures_of_model_fit %>%
     filter(r.squared < 0.20)
 
 ```
-
-
 
 # Plot linear fit for different countries
 
@@ -254,10 +250,6 @@ jmp_measures_of_model_fit %>%
 
     
 ```
-
-
-
-
 
 # Alternative models
 
