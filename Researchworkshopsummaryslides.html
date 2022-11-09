@@ -9,7 +9,9 @@
 <link href="Researchworkshopsummaryslides_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.1.189">
 
-  <title>Research workshop summary slides</title>
+  <meta name="author" content="Linda Karani">
+  <meta name="author" content="Lars Schöbitz">
+  <title>R Packages for SDG 6.2 data</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -324,34 +326,49 @@
     <div class="slides">
 
 <section id="title-slide" class="center">
-  <h1 class="title">Research workshop summary slides</h1>
+  <h1 class="title">R Packages for SDG 6.2 data</h1>
+  <p class="subtitle">Development and MSc Data Science project</p>
+  <p class="author">Linda Karani</p>
+  <p class="author">Lars Schöbitz</p>
 </section>
 
-<section>
-<section id="sdg-6.2-reproducibility" class="title-slide slide level1 center">
-<h1>SDG 6.2 Reproducibility</h1>
-
-</section>
-<section id="agenda" class="slide level2 smaller">
+<section id="agenda" class="slide level2">
 <h2>Agenda</h2>
-<p>Overall vision (raw data, estimates code, jmp estimates package)</p>
-<p>Raw data package documentation (proof-of-concept website)</p>
+<ol type="1">
+<li>R Package Development</li>
+<li>Master Thesis Project
 <ul>
-<li>Statistics of the raw data</li>
-</ul>
-<p>Master Thesis Project</p>
+<li>Fit models for estimates
 <ul>
-<li>Fit models for estimates - Prepare primary indicators estimates based on JMP estimation rules - Prepare secondary indicator service levels</li>
-<li>Extract r squared and p-values from models - Identify those with low values &lt; 0.20 and high values &gt; 0.80 - Plots exploring the OLS regression using two countries with low and high rsq values</li>
+<li>Prepare primary indicators estimates based on JMP estimation rules</li>
+<li>Prepare secondary indicator service levels</li>
+</ul></li>
+<li>Extract r squared and p-values from models
+<ul>
+<li>Identify those with low values &lt; 0.20 and high values &gt; 0.80</li>
+<li>Plots exploring the OLS regression using two countries with low and high rsq values</li>
+</ul></li>
 <li>Plots showing the model fit coefficients(r.squared and p value)</li>
 <li>Fit alternative models and assess goodness of fit</li>
 <li>Next steps</li>
-</ul>
+</ul></li>
+<li>Questions for Discussion</li>
+</ol>
 </section>
-<section id="masters-thesis-otline" class="slide level2">
-<h2>Masters thesis otline</h2>
+<section id="r-package-development" class="title-slide slide level1 center" data-background-color="#eee8d5">
+<h1>R Package Development</h1>
+
+</section>
+
+<section>
+<section id="master-thesis-project" class="title-slide slide level1 center" data-background-color="#eee8d5">
+<h1>Master Thesis Project</h1>
+
+</section>
+<section id="masters-thesis-outline" class="slide level2">
+<h2>Masters thesis outline</h2>
 <div>
-<p>Objectives</p>
+<h3 id="objectives">Objectives</h3>
 <ul>
 <li class="fragment">Generate sanitation estimates for rural and urban from raw packaged data using documented methods
 <ul>
@@ -365,7 +382,7 @@
 </ul></li>
 <li class="fragment">Fit different statistical models to assess goodness of fit</li>
 </ul>
-<p>Status</p>
+<h3 id="status">Status</h3>
 <ul>
 <li class="fragment">Managed to derive estimates for the primary indicators and derived secondary service levels</li>
 </ul>
