@@ -23,11 +23,11 @@ Raw data package documentation (proof-of-concept website)
 Master Thesis Project
 
 -   Fit models for estimates
-        - Prepare primary indicators estimates based on JMP estimation rules
-        - Prepare secondary indicator service levels
+         -  Prepare primary indicators estimates based on JMP estimation rules
+         -  Prepare secondary indicator service levels
 -   Extract r squared and p-values from models
-        - Identify those with low values < 0.20 and high values > 0.80
-        - Plots exploring the OLS regression using two countries with low and high rsq values
+         -  Identify those with low values < 0.20 and high values > 0.80
+         -  Plots exploring the OLS regression using two countries with low and high rsq values
 -   Plots showing the model fit coefficients(r.squared and p value)
 -   Fit alternative models and assess goodness of fit
 -   Next steps
@@ -97,7 +97,10 @@ low_rsq <- jmp_measures_of_model_fit %>%
 
 # Plot linear fit for different countries
 
+
 ## OLS Regression : r squared \< 0.20
+
+## Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
@@ -124,12 +127,15 @@ plot1
 :::
 
 ::: {.column width="20%"}
+
 -   Afghanistan r.sq rural = 0.0426018
 -   Afghanistan r.sq urban = 0.0170736
 :::
 :::
 
 
+
+## Tanzania open defecation
 
 ::: columns
 ::: {.column width="80%"}
@@ -160,8 +166,11 @@ plot2
 :::
 :::
 
+
+
 ## OLS Regression : r squared \> 0.80
-### Argentina Sewer connection OLS regression
+
+## Argentina Sewer connection OLS regression
 
 ::: columns
 ::: {.column width="80%"}
@@ -188,15 +197,20 @@ plot11
 :::
 
 ::: {.column width="20%"}
+
 -   Argentina r.sq rural = 0.82
 -   Argentina r.sq urban = 0.87
 :::
 :::
 
+
+
+
+## Brazil Improved sanitation OLS regression
+
 ::: columns
 ::: {.column width="80%"}
 
-### Brazil Improved sanitation OLS regression
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 plot21 <- jmp_all_mean_value %>% 
@@ -221,6 +235,7 @@ plot21
 -   Brazil r.sq urban = 0.87
 :::
 :::
+
 
 
 # Plotting Model coefficients
@@ -368,10 +383,11 @@ loess_model$model
 
 ```
 
-# Plots
 
-## Plot using a 4th order polynomial
-### Afghanistan Sewer connection
+
+# Plot using a 4th order polynomial
+
+## Afghanistan Sewer connection
 
 ::: columns
 ::: {.column width="80%"}
@@ -401,7 +417,9 @@ plot3
 :::
 
 
-### Tanzania open defecation
+
+## Tanzania open defecation
+
 ::: columns
 ::: {.column width="80%"}
 
@@ -431,8 +449,10 @@ plot4
 :::
 :::
 
-## Plot using splines
-### Afghanistan sewer connection
+# Plot using splines
+
+
+## Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
@@ -462,7 +482,9 @@ plot5
 :::
 :::
 
-### Tanzania Open defecation
+
+
+## Tanzania Open defecation
 
 ::: columns
 ::: {.column width="80%"}
@@ -493,8 +515,9 @@ plot6
 :::
 :::
 
-## Plot using GAM
-### Afghanistan sewer connection
+# Plot using GAM
+
+## Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
@@ -525,7 +548,9 @@ plot7
 :::
 :::
 
-### Tanzania open defecation
+
+
+## Tanzania open defecation
 
 ::: columns
 ::: {.column width="80%"}
@@ -558,8 +583,9 @@ plot8
 :::
 :::
 
-## Plotting using LOESS
-### Afghanistan sewer connection
+# Plotting using LOESS
+
+## Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
@@ -591,7 +617,8 @@ plot9
 :::
 
 
-### Tanzania open defecation
+
+## Tanzania open defecation
 
 ::: columns
 ::: {.column width="80%"}
