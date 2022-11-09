@@ -479,7 +479,8 @@ rsquared <- poly4model|>
     summarise(rsq = summary(model)$r.squared) 
 
 
-  
+
+
 ```
 
 ```{r , warning=FALSE, include=FALSE, echo=FALSE, message=FALSE}
@@ -584,7 +585,7 @@ plot3 <- jmp_all_mean_value %>%
     stat_smooth(method = "lm", formula =  y ~ poly(x,4, raw = TRUE))+
     labs(x = "year",
          y = "% coverage",
-         title = "AFG Sewer connection in rural and urban contexts")+
+         title = "Afghanistan Sewer connection in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -649,7 +650,7 @@ plot5 <- jmp_all_mean_value %>%
     stat_smooth(method = "lm", formula =  y ~ splines::bs(x, df = 3))+
     labs(x = "year",
          y = "% coverage",
-         title = "AFG Sewer connection in rural and urban contexts")+
+         title = "Afghanistan Sewer connection in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -723,7 +724,7 @@ plot7 <- jmp_all_mean_value %>%
 
 plot7
 
-?stat_smooth
+
 ```
 
 :::
@@ -786,7 +787,7 @@ plot9 <- jmp_all_mean_value %>%
     stat_smooth(method = loess, span = 0.90)+
     labs(x = "year",
          y = "% coverage",
-         title = "AFG Sewer connection in rural and urban contexts")+
+         title = "Afghanistan Sewer connection in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
@@ -833,6 +834,51 @@ plot10
 -   Tanzania RSE urban = 0.033
 :::
 :::
+
+# Summary
+
+## Comparison of models{.smaller}
+
+1. Higher order polynomial
+   - Pros
+     - Easy implementation
+     - Significant increase in r.sq for above 10 data points and for coverage
+     values above 10%. The r.sq for open defecation in Tanzania increased from 
+     18% to 49%
+     
+   - Cons
+     - r.sq does not seem to improve for coverage values below 10% and for few 
+     data points
+     
+2. Splines
+   - Pros
+     - Takes the shape of the data
+     - r.sq significantly improves. 100% for Afghanistan sewer connection in
+    rural and urban contexts
+   - Cons
+     - Selection of knots
+    
+3. Generalized additive models
+   - Pros
+     - Automatic selection of knots
+   - Cons
+     - Tends to have a large standard error 
+     - Not easily explainable
+    
+4. Loess
+   - Pros
+     - Takes the shape of the data
+     - Low standard error for few data points
+   - Cons
+     - Tends to overfit for few data points
+     - Not easily explainable
+     - Not suitable for prediction
+
+## Next steps
+
+- Work through secondary indicators
+- Create a decision tree that recommends different models for different countries
+
 
 # Discussion {background-color="#eee8d5"}
 

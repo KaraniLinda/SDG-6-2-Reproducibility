@@ -976,6 +976,73 @@
 </div>
 </section></section>
 <section>
+<section id="summary" class="title-slide slide level1 center">
+<h1>Summary</h1>
+
+</section>
+<section id="comparison-of-models" class="slide level2 smaller">
+<h2>Comparison of models</h2>
+<ol type="1">
+<li>Higher order polynomial
+<ul>
+<li>Pros
+<ul>
+<li>Easy implementation</li>
+<li>Significant increase in r.sq for above 10 data points and for coverage values above 10%. The r.sq for open defecation in Tanzania increased from 18% to 49%</li>
+</ul></li>
+<li>Cons
+<ul>
+<li>r.sq does not seem to improve for coverage values below 10% and for few data points</li>
+</ul></li>
+</ul></li>
+<li>Splines
+<ul>
+<li>Pros
+<ul>
+<li>Takes the shape of the data</li>
+<li>r.sq significantly improves. 100% for Afghanistan sewer connection in rural and urban contexts</li>
+</ul></li>
+<li>Cons
+<ul>
+<li>Selection of knots</li>
+</ul></li>
+</ul></li>
+<li>Generalized additive models
+<ul>
+<li>Pros
+<ul>
+<li>Automatic selection of knots</li>
+</ul></li>
+<li>Cons
+<ul>
+<li>Tends to have a large standard error</li>
+<li>Not easily explainable</li>
+</ul></li>
+</ul></li>
+<li>Loess
+<ul>
+<li>Pros
+<ul>
+<li>Takes the shape of the data</li>
+<li>Low standard error for few data points</li>
+</ul></li>
+<li>Cons
+<ul>
+<li>Tends to overfit for few data points</li>
+<li>Not easily explainable</li>
+<li>Not suitable for prediction</li>
+</ul></li>
+</ul></li>
+</ol>
+</section>
+<section id="next-steps" class="slide level2">
+<h2>Next steps</h2>
+<ul>
+<li>Work through secondary indicators</li>
+<li>Create a decision tree that recommends different models for different countries</li>
+</ul>
+</section></section>
+<section>
 <section id="discussion" class="title-slide slide level1 center" data-background-color="#eee8d5">
 <h1>Discussion</h1>
 
@@ -1002,8 +1069,8 @@
 <section id="thanks-1" class="slide level2">
 <h2>Thanks!</h2>
 <p><strong>Data source:</strong> washdata.org</p>
-<p><strong>Slides - source code:</strong> https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/Researchworkshopsummaryslides.qmd</p>
-<p><strong>Slides - PDF download:</strong></p>
+<p><strong>Slides - source code:</strong> https://github.com/KaraniLinda/SDG-6-2-Reproducibility/blob/main/slides/r-packages-for-sdg62-data-lkarani-lschoebitz.qmd</p>
+<p><strong>Slides - PDF download:</strong> https://github.com/KaraniLinda/SDG-6-2-Reproducibility/raw/main/slides/r-packages-for-sdg62-data-lkarani-lschoebitz.pdf</p>
 <div class="footer footer-default">
 
 </div>
