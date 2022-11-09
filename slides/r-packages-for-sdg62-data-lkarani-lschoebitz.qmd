@@ -47,7 +47,7 @@ library(sf)
 #Getting data
 
 #jmpraw <- read_rds("data/2020-09-30_jmp_sanitation_raw_data.rds")
-jmpraw <- read_rds("data/2022-10-19_jmp_sanitation_raw_data.rds")
+jmpraw <- read_rds(here::here("data/2022-10-19_jmp_sanitation_raw_data.rds"))
 
 jmp_measures_of_model_fit <- read_csv(here::here("data/derived/jmp_primary_indicator_estimates_measures_of_model_fit.csv"))
 
