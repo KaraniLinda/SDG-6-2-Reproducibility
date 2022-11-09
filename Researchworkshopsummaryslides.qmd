@@ -387,6 +387,8 @@ plot3 <- jmp_all_mean_value %>%
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
+
+plot3
 ```
 
 :::
@@ -394,12 +396,14 @@ plot3 <- jmp_all_mean_value %>%
 ::: {.column width="20%"}
 -   Afghanistan r.sq rural = 0.043
 -   Afghanistan r.sq urban = 0.022
--   Tanzania r.sq rural    = 0.487
--   Tanzania r.sq urban    = 0.033
+
 :::
 :::
 
 
+### Tanzania open defecation
+::: columns
+::: {.column width="80%"}
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -421,19 +425,18 @@ plot4
 :::
 
 ::: {.column width="20%"}
--   Afghanistan r.sq rural = 0.043
--   Afghanistan r.sq urban = 0.022
+
 -   Tanzania r.sq rural    = 0.487
 -   Tanzania r.sq urban    = 0.033
 :::
 :::
 
 ## Plot using splines
+### Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
-
 plot5 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -446,6 +449,26 @@ plot5 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
+plot5
+```
+
+:::
+
+::: {.column width="20%"}
+
+-   Afghanistan r.sq rural = 1.00
+-   Afghanistan r.sq urban = 1.00
+
+:::
+:::
+
+### Tanzania Open defecation
+
+::: columns
+::: {.column width="80%"}
+
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 plot6 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -458,27 +481,25 @@ plot6 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
-grid.arrange(plot5,plot6)
-
+plot6
 
 ```
 :::
 
 ::: {.column width="20%"}
 
--   Afghanistan r.sq rural = 1.00
--   Afghanistan r.sq urban = 1.00
 -   Tanzania r.sq rural    = 0.65
 -   Tanzania r.sq urban    = 0.37
 :::
 :::
 
 ## Plot using GAM
+### Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
-```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 plot7 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Sewer") & iso3 == "AFG") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
@@ -491,33 +512,58 @@ plot7 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
+plot7
+```
 
+:::
+
+::: {.column width="20%"}
+
+-   Afghanistan BIC rural = 18.5
+-   Afghanistan BIC urban = 36.1
+
+:::
+:::
+
+### Tanzania open defecation
+
+::: columns
+::: {.column width="80%"}
+
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
 plot8 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = gam, formula =  y ~ s(x, k=3))+
     labs(x = "year",
          y = "% coverage",
-         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+         title = "Tanzania open defecation in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
 
-grid.arrange(plot7,plot8)
+plot8
 ```
+
+
 :::
 
 ::: {.column width="20%"}
--   Fits spline models with automated selection of knots
+
+-   Tanzania BIC rural = 87.6
+-   Tanzania BIC urban = 49.2
 :::
 :::
 
 ## Plotting using LOESS
+### Afghanistan sewer connection
 
 ::: columns
 ::: {.column width="80%"}
+
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
 
 plot9 <- jmp_all_mean_value %>% 
@@ -532,24 +578,45 @@ plot9 <- jmp_all_mean_value %>%
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
+plot9
+```
+
+:::
+
+::: {.column width="20%"}
+
+-   Afghanistan RSE rural = 0.043
+-   Afghanistan RSE urban = 0.022
+:::
+:::
+
+
+### Tanzania open defecation
+
+::: columns
+::: {.column width="80%"}
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 plot10 <- jmp_all_mean_value %>% 
     filter(var_long %in% c("Open defecation") & iso3 == "TZA") %>%
     ggplot(aes(x = year, y = mean_value)) + geom_point() + facet_wrap(~residence) +
     stat_smooth(method = loess, span = 0.90)+
     labs(x = "year",
          y = "% coverage",
-         title = "Zimbambwe Improved Sanitation in rural and urban contexts")+
+         title = "Tanzania open defecation in rural and urban contexts")+
     theme_gray() +
     theme(title = element_text(size = 12), 
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 12, face = "bold"))
 
-grid.arrange(plot9,plot10)
+plot10
 
 ```
 :::
 
 ::: {.column width="20%"}
--   Also a smoothing technique but tends to be slow on large datasets
+
+-   Tanzania RSE rural = 0.487
+-   Tanzania RSE urban = 0.033
 :::
 :::
