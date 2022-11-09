@@ -837,7 +837,7 @@ plot10
 
 # Summary
 
-## Comparison of models{.smaller}
+## Comparison of models {.scrollable}
 
 1. Higher order polynomial
    - Pros
