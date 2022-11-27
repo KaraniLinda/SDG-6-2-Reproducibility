@@ -1,16 +1,23 @@
 ---
+title: "Thesis report"
 format: html
+editor: source
+bibliography: msc-thesis-lkarani.bib
+csl: apa.csl
 ---
 
 #Introduction
 
 ## Background
-The Sustainable Development Goals (SDGs), otherwise known as the Global Goals, are a set of objectives within a universal agreement to end poverty, protect all that makes the planet habitable, and ensure that all people enjoy peace and prosperity, now and in the future (Morton et al 2017). The WHO/UNICEF Joint Monitoring Programme (JMP, n.d.) has been responsible for global monitoring of water, sanitation, and hygiene (Sustainable development goal 6) since 1990 (UNICEF, 2018). To compute indicator estimates for water and sanitation(WASH), the JMP relies on data from a variety of national data sources including: national censuses, national household surveys and administrative data. JMPs mission is “to be the trusted source of global, regional and national data on sustainable access to safe drinking water and basic sanitation for use by governments, donors, international organizations and civil society”. Producing accurate global estimates requires accurate data to effectively monitor progress on Sustainable Development Goals(SDGs) and enhance quality evidence - based decision making.
+
+The Sustainable Development Goals (SDGs), otherwise known as the Global Goals, are a set of objectives within a universal agreement to end poverty, protect all that makes the planet habitable, and ensure that all people enjoy peace and prosperity, now and in the future [@morton2017sustainable]. The WHO/UNICEF Joint Monitoring Programme (JMP, n.d.) has been responsible for global monitoring of water, sanitation, and hygiene (Sustainable development goal 6) since 1990 [@supply2015progress]. To compute indicator estimates for water and sanitation(WASH), the JMP relies on data from a variety of national data sources including: national censuses, national household surveys and administrative data. JMPs mission is “to be the trusted source of global, regional and national data on sustainable access to safe drinking water and basic sanitation for use by governments, donors, international organizations and civil society”. Producing accurate global estimates requires accurate data to effectively monitor progress on Sustainable Development Goals(SDGs) and enhance quality evidence - based decision making.
 
 ## methodology
 
 ### Data sources
-### Modeling approach
+### Modeling approach/ Calculation of estimates
+- Linear model
+- Interpolation/extrapolation
 
 
 
