@@ -31,7 +31,7 @@ Producing accurate global estimates requires statistically sound and reproducibl
 
 # Problem statement
 
-Advancement in SDG 6 depends a lot on a strong foundation of data credibility. Accurate data is the lifeblood of decision-making and the raw material for ensuring accountability [@zotero-2009]. To calculate its estimates, The Joint Monitoring Programme relies on country-level open government data. . This data is stored in multiple formats, which are often not machine-readable (e.g. PDFs), unstructured, and without metadata. Processing this data is time consuming, prone to errors, and difficult to reproduce.This could be overcome by making the data readily accessible in a form that follows the FAIR data principles [@Wilkinson.etal2016].It is therefore crucial that the data shared through open government sources is machine readable to facilitate comparability, more accurate and efficient analysis. In addition, the current JMP method has received criticism as the generated estimates differ from the national country estimates. This is likely due to the underlying data sources or the fact that the estimates are derived from a linear regression which fails to capture different country non linear trends[@bartram2014global]. The JMP uses linear regression due to its simplicity, the limited number data points available and the ease of explanation[@perez-foguet2017compositional]. [@ezbakhe2019estimating ; @fuller2016tracking] propose alternative modeling methods to better monitor the SD6 2030 target.
+Advancement in SDG 6 depends a lot on a strong foundation of data credibility. Accurate data is the lifeblood of decision-making and the raw material for ensuring accountability [@zotero-2009]. To calculate its estimates, The Joint Monitoring Programme relies on country-level open government data. . This data is stored in multiple formats, which are often not machine-readable (e.g. PDFs), unstructured, and without metadata. Processing this data is time consuming, prone to errors, and difficult to reproduce.This could be overcome by making the data readily accessible in a form that follows the FAIR data principles [@wilkinson2016faira].It is therefore crucial that the data shared through open government sources is machine readable to facilitate comparability, more accurate and efficient analysis. In addition, the current JMP method has received criticism as the generated estimates differ from the national country estimates. This is likely due to the underlying data sources or the fact that the estimates are derived from a linear regression which fails to capture different country non linear trends[@bartram2014global]. The JMP uses linear regression due to its simplicity, the limited number data points available and the ease of explanation[@perez-foguet2017compositional]. [@ezbakhe2019estimating ; @fuller2016tracking] propose alternative modeling methods to better monitor the SD6 2030 target.
 
 To overcome the challenges described above, this study will develop a reproducible R package that derives the estimates from the raw data in addition to evaluating alternative statistical model and building a decision tree that map outs appropriate models depending on the number of data points and the trend a country has.
 
@@ -46,32 +46,77 @@ In addition to answering the questions above, this research aims to contribute t
 
 1. Opening up the data transformation process of computing JMP’s global estimates by using the same input data in a bid to attain the same results which is in line with its mission of producing accurate global estimates.	
 2. Addressing common issues around data management such as data stored in non machine-readable formats, such as PDFs or data being shared by email, and how this may deter progress towards universal access to sanitation (SDG 6.2)
-3. Providing a user-friendly R package that follows FAIR principles for data management and stewardship [@Wilkinson.etal2016]  for users to conduct their own analyses from the JMP data to answer new questions and better understand trends in access to sanitation and safe management
+3. Providing a user-friendly R package that follows FAIR principles for data management and stewardship [@wilkinson2016faira]  for users to conduct their own analyses from the JMP data to answer new questions and better understand trends in access to sanitation and safe management
 4. Developing a decision tree that selects models based on different country data scenarios 
 
 # Literature review
 
-Data makes science possible. Sharing data improves visibility, and makes the research process transparent. This increases trust in the work, and allows for independent reproduction of results. Good data management is not a goal in itself, but rather is the key conduit leading to knowledge discovery and innovation, and to subsequent data and knowledge integration and reuse by the community after the data publication process [@Wilkinson.etal2016]. This section of the study will be two fold : The first section will focus on some of the data management principles as highlighted by different authors that overcome the barrier to reproducibility while the second section with focus on different methodologies employed by researchers to the Water and Sanitation(WASH) raw data to assess trends and monitor progress.
+Data drives research and new inventions. Sharing data improves visibility, and makes the research process transparent which increases trust and enhances reproducibility of the results [@tierney2020realistica]. Good data management leads to knowledge discovery and innovation, and to subsequent data and knowledge integration and reuse by the community after the data has been published [@wilkinson2016faira]. This section of the study will be two fold : The first section will focus on some of the data management principles as highlighted by different authors that overcome the barrier to reproducibility while the second section with focus on different methodologies employed by researchers to the Water and Sanitation(WASH) raw data to assess trends and monitor progress.
 
 ## Principles of data mangement and reproducibility.
 
+[@Claerbout.Karrenbach1992] in an effort to achieve reproducibility, create a simple filing system, ReDoc, that allows authors to easily reproduce results and computations using standardized rules and commands  instead of recreating the work from scratch which is often a tedious process. It offers users four commands: burn the figures which removes the easily reproducible result files, build the figures which recomputes them and updates the easily reproducible result files, view the figures which displays the figures, and clean up and remove all intermediate results which removes all files other than source or result files making it more accessible. To better understand the four commands, they  define three types of files that are linked to Rebocs four commands: Fundamental files which constitute datasets, scripts and makefiles, Result files which are plot files eg gif files and lastly Intermediate files which lie between fundamental files and the result files such as executables and partially processed data.
+
+[@Gentleman.Lang2007] introduce the concept of a compendium as a container for the different elements that make up the document and its computations i.e. text, code and data which enables different researchers to reproduce any document contained in the compendium reliably across multiple computing environments to generate the researchers published view. A compendium contains one or more dynamic documents containing code and text chunks which requires programming software to generate its content. There are two ways in which a compendium can be processed: Transformation of the input data through code using languages such as R to yield output and combining this output data with textual descriptions to provide the end user with a narrative.
+
+[@Mesirov2010a] recognize the need of having a paradigm that can also benefit those who do not know how to code to perform and publish their reproducible research. They propose a simple Reproducible Research System(RSS) for non programmers to use which contains two components: Reproducible Research Environment(RRE) where all the computational work is done with the ability to track analysis and results and package them for redistribution and Reproducible Research Publisher(RRP) which is a document preparation system that can then be linked  to RRE. They implement this in a genomics environment where the Reproducible research environment represents the GenePattern computational genomics environment which is an environment used to analyze genomic data sets and the Reproducible Research Publisher is an adaptation of Microsoft Word that can link text, tables and figures to GenePattern.
+
+[@Peng2011] lists unavailability of code, lack of culture that requires reproducibility of scientific claims and lack of an integrated software infrastructure for sharing reproducible research with others as some of the barriers hindering computational reproducibility. He proposes the following solutions to the scientific community ;  First, he recommends that the code be made available through publishing. Second, he recommends publishing a tidy version of the code alongside the data sets used in a durable non proprietary format. Lastly he recommends pooling all data, metadata and code in a centralized repository linked with respective publications. To ascertain the reproducibility of different authors' research work, [@Peng2011] through the Journal Biostatistics have introduced a policy where authors submit their code or data for review, the code is then run on the data to verify the published results. Authors whose research passes the reproducibility review receive an “R” mark.
+
+[@Sandve.etal2013] in their research state that good reproducibility habits save time in the long run through reuse of code. They also note that technology plays a big part in enhancing efficient reproducibility. They list ten rules that each capture a specific aspect of reproducible research. The rules include:
+1. Keeping track of how each result was produced(Analysis workflow)
+2. Avoiding manual data manipulation steps and instead rely on program executions to reduce errors and increase efficiency.
+3. Archiving the exact versions of all external programs used in order to reproduce a given result.
+4. Version control all custom scripts using systems such as Git to systematically store code. 
+5. Recording intermediate results in standardized formats to help in uncovering bugs
+6. Noting underlying random seeds for analyses that include randomness so as to generate identical results each time the code is run.
+7. Storing raw data behind plots to allow easy retrieval and make modification to the plots.
+8. Generating Hierarchical Analysis Output to allow inspection of detailed values underlying the summaries. This can be achieved through incorporating debug outputs in the source code
+9. Connect textual statements eg claims and conclusions with enough detail to underlying results to allow for reevaluation and for other researchers to test claims
+10. Providing public and easy access to all input data, scripts, runs and results 
+
+[@Piccolo.Frampton2016] also describe similar techniques to [@Sandve.etal2013] for computational reproducibility and that overcome software limitations. They include:
+1. Providing a detailed written description of the analytical process followed, the operating system and the software dependencies used. 
+2. Providing custom scripts that include information on text based commands to enable other researchers extend the analysis more easily
+3. Indicate clearly which versions of the software and the respective dependencies should be installed
+4. Using narratives alongside code using the literate programming technique that combines plots, code, data, equations and the narrative. This is especially useful for non technical users. One way of achieving this is through use of tools such as Jupyter notebook that combines code, data, text and mathematical equations.
+5. Workflow management systems to facilitate execution of software where the output of one tool is used as input to additional tools. 
+6. Using virtual machines which can encapsulate an entire operating system and all software, scripts, code, and data necessary to execute a computational analysis and obtain similar results. A good example of this is VirtualBox. This overcomes the challenge of different outputs associated with different versions of operating systems.
+7. Using software containers which are a lighter weight alternative to virtual machines and ease the process of installing and configuring dependencies. Similar to virtual machines, they encapsulate code, scripts and data into a single package that can be shared with others. A good example of a software container is Docker.
+
+[@wilkinson2016faira] describes four principles(FAIR) for good data management and stewardship- Findability, Accessibility, Interoperability and Reusability. To make data findable, it should contain rich metadata, be indexed or registered in a searchable source and clearly and explicitly include an identifier. To make data accessible, it should be open, free and universally implementable and allow for an authentication and authorization procedure where necessary. Interoperability describes data that uses a formal, accessible and broadly applicable language for knowledge representation, vocabularies that follow fair principles and the data includes qualified references to other data/metadata. Lastly, Reusability describes data that is accurate and uses relevant attributes, has a clear and accessible usage license, is associated with detailed provenance and meets domain relevant community standards. They further outline six good practices for computing workflows with organized data, documented steps, and the project structured for reproducibility which include:
+
+1. Data management which includes saving raw data, documenting all the different steps, creating analysis friendly data(tidy data) and using a unique identifier for each record.
+2.Software which involves writing code that is readable, reusable and testable with clearly defined inputs and outputs.
+3. Collaborating which makes it easy for new users to understand, cite and build on a project
+4. Project organization in a logical and consistent directory structure  to enable easy discovery and understanding of the project.
+5. Tracking changes to facilitate easy retrieval by different users. An example of a tool used in tracking changes is Git which keeps track of any change made in a file
+6. Writing manuscripts in a way that keeps an audit trail to reduce the chances of work being lost and ensure the work is available to different authors at all times.
+
+Lastly, [@tierney2020realistica] focus on the practical side of sharing data to improve reproducibility. They state that easy and repeated access to raw data for data analysis is a persistent challenge despite the advancements made in sharing code and computing environments. They list 8 sets of requirements to provide while sharing data which include: 
+
+1. README which is meant to provide a description of the data to the end user. It contains information on WHO collected the data, WHAT the data is, WHEN it was collected, WHERE it was collected, WHY it was collected and HOW it was collected. 
+2. Data dictionary which provides context on the nature and structure of the data. It contains variable names, variable labels, variable codes and special values for missing data.
+3. License which provides rules on how everyone can modify, use and share the data
+4. Citation which provides information about how you want your data to be cited. A Digital Object 5. Identifier(DOI) is a unique identifier often used as a prerequisite for citation.
+5. Machine readable metadata which is data that is in a format that can be processed by a computer i.e structured format allowing data to be searched and indexed online
+6. Raw data represents data that has not been processed for use. It’s in its initial format before any cleaning has been performed
+7. Scripts represent the file containing the commands, structured to be executed like a program. 
+8. Analysis ready data - This is the final data ready for analysis. It should be in tidy format where each variable must have its own column, each observation must have its own row and each type of observational unit forms a table.
+
+A key to enhancing reproducibility as described by the different authors in this section is to make available the raw data and code used to generate the authors findings in a way that different authors can easily verify results and build on the study which can be achieved through documentation or advanced technologies such as software containers and virtual machines that encapsulate the data and code in a single package. There is no one size fits all and hence different researchers should aim to combine the different techniques to achieve the most value according to their needs.
+
+## Statistical modeling
 
 
-# Results & Discussion
+
+## Research gap
 
 
-
-```{r}
-#| child: "sections/03-02-results-model-fit.qmd"
-```
-
+# Methodology
 
 
 
 
 
-# Conclusions
 
-# Recommendations
-
-# References
