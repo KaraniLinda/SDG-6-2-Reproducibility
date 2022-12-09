@@ -20,15 +20,6 @@ editor_options:
 
 1. R Package Development
 2. Master Thesis Project
-    - Fit models for estimates
-        - Prepare primary indicators estimates based on JMP estimation rules
-        - Prepare secondary indicator service levels
-    - Extract r squared and p-values from models
-        - Identify those with low values < 0.20 and high values > 0.80
-        - Plots exploring the OLS regression using two countries with low and high rsq values
-    - Plots showing the model fit coefficients(r.squared and p value)
-    - Fit alternative models and assess goodness of fit
-    - Next steps
 3. Questions for Discussion
 
 ```{r, include=FALSE, message=FALSE, warning=FALSE}
@@ -270,6 +261,17 @@ service levels
 
 :::
 
+## Methodological Steps
+
+- Fit models for estimates
+    - Prepare primary indicators estimates based on JMP estimation rules
+    - Prepare secondary indicator service levels
+- Extract r squared and p-values from models
+    - Identify those with low values < 0.20 and high values > 0.80
+    - Plots exploring the OLS regression using two countries with low and high rsq values
+- Plots showing the model fit coefficients(r.squared and p value)
+- Fit alternative models and assess goodness of fit
+- Next steps
 
 ```{r}
 #Filter for R2 less than 0.30
