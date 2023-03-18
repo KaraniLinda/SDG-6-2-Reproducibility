@@ -58,7 +58,7 @@ Data drives research and new inventions. Sharing data improves visibility, and m
 ## Principles of data mangement and reproducibility.
 
 
-[@Claerbout.Karrenbach1992] in an effort to achieve reproducibility, create a simple filing system, ReDoc, that allows authors to easily reproduce results and computations using standardized rules and commands instead of recreating the work from scratch which is often a tedious process. It offers users four commands: burn the figures which removes the easily reproducible result files, build the figures which recomputes them and updates the easily reproducible result files, view the figures which displays the figures, and clean up and remove all intermediate results which removes all files other than source or result files making it more accessible. To better understand the four commands, they define three types of files that are linked to Rebocs four commands: Fundamental files which constitute datasets, scripts and makefiles, result files which are plot files (e.g. gif files) and lastly Intermediate files which lie between fundamental files and the result files such as executables and partially processed data.
+[@claerbout1992electronic] in an effort to achieve reproducibility, create a simple filing system, ReDoc, that allows authors to easily reproduce results and computations using standardized rules and commands instead of recreating the work from scratch which is often a tedious process. It offers users four commands: burn the figures which removes the easily reproducible result files, build the figures which recomputes them and updates the easily reproducible result files, view the figures which displays the figures, and clean up and remove all intermediate results which removes all files other than source or result files making it more accessible. To better understand the four commands, they define three types of files that are linked to Rebocs four commands: Fundamental files which constitute datasets, scripts and makefiles, result files which are plot files (e.g. gif files) and lastly Intermediate files which lie between fundamental files and the result files such as executables and partially processed data.
 
 [@gentleman2007statistical] introduce the concept of a compendium as a container for the different elements that make up the document and its computations i.e. text, code and data which enables different researchers to reproduce any document contained in the compendium reliably across multiple computing environments to generate the researchers published view. A compendium contains one or more dynamic documents containing code and text chunks which requires programming software to generate its content. There are two ways in which a compendium can be processed: Transformation of the input data through code using languages such as R to yield output and combining this output data with textual descriptions to provide the end user with a narrative.
 
@@ -201,20 +201,91 @@ nd $\epsilon_i$ represents the error term at time $i$.
 
 3.  Extension for four years backwards and forwards beyond the years covered by data inputs and extrapolation.
 
+The above steps are effectively demonstrated in "Figure \ref{fig:Figure 1}" below:
+
+```{figure} [htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{linearreg.png}
+\caption{Interpolation, extrapolation and extension of JMP estimates.\protect\footnotemark}
+\label{fig:Figure 1}
+\end{figure}
+\footnotetext{Image source: (JMP, 2017).}
+
+
 Using R as a scripting language, the raw data will be extracted from each of the national excel country files downloaded from the official WHO/UNICEF JMP website (https://washdata.org/data). R will further be used for data cleaning and transformation. A linear model will then be applied to derive the estimates with the goal to reproduce the statistical methods applied by the WHO/UNICEF JMP using the same rules described above. This approach is further described in detail by [@bartram2014global] and [@fuller2016tracking]
 
-The derived estimates will then be compared to the JMP estimates to and assessed for goodness of fit using the R squared an P value criterion.
+The derived estimates will then be compared to the JMP estimates to and assessed for goodness of fit using the AIC, BIC and RMSE. The proposed methodological approach is shown in "Figure \ref{fig:Figure 2} below:
+
+```{figure} [htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{Methodology.png}
+\caption{Proposed approach}
+\label{fig:Figure 2}
+\end{figure}
 
 ## Alternative statistical models
 
 This study will then fit different non linear models to the data points for each of the 232 countries using the same estimation rules applied to the ordinary least squares regression. These will include:
 
-1.  Locally Estimated Scatterplot Smoothing(LOESS) : This is a smoothing function used to model non linear relationships by making a large number of quadratic or linear regression lines as a window moves along the x-axis.
+1.  Local Regression(LOESS) : This is a non parametric smoothing function used to model non linear relationships by making a large number of quadratic or linear regression lines as a window moves along the x-axis. It is an important tool for modeling non linear relationships in the social sciences field [@Jacoby2000]. The exact equation is:
 
-2.  Generalized additive model(GAM) : It is also used to model non linear relationships by assuming that the outcome variable can be modeled by a sum of arbitrary functions of each independent feature.
+$$
+y_i = \hat{f}(x_i) + \epsilon_i,
+$$
 
-3.  Quadratic : These are regressions with a quadratic term added to it
+where $\hat{f}(x_i)$ is the locally estimated regression function at $x_i$, and $\epsilon_i$ is the residual error at $x_i$.
 
-4.  Splines : These are formed by joining two or more linear regression lines. The point where the lines intersect is referred to as a knot.
+In the above equation equation, y represents the coverage/percentage of the population using a particular service level, and x represents time/individual year. The equation states that each observed y value is equal to the predicted value of the loess regression function $\hat{f}(x_i)$ at the corresponding x value, plus an error term $\epsilon_i$.
 
-After fitting the models, this study will analyse performance using the Akaike information criterion(AIC), the Bayesian information criterion(BIC) and the Root Mean Square Error(RMSE) after which a decision tree will be mapped out to select a suitable model depending on the country scenarios.
+2.  Generalized additive model(GAM) : It is also used to model non linear relationships by assuming that the outcome variable can be modeled by a sum of arbitrary functions of each independent feature. This model is also employed by [@fuller2016tracking & @perez-foguet2017compositional] in their research. Unlike the mentioned studies, this research will not be performing a log transformation on the dependent variable. The standard GAM as per the below equation will be applied to the data points for each country
+
+$$
+y_i = \alpha + \sum_{j=1}^p f_j(x_{ij}) + \epsilon_i,
+$$
+
+where $\alpha$ is the intercept term, $p$ is the number of predictors (in this case, one predictor `x`), $f_j(x_{ij})$ is the smooth function for the $j$th predictor at the $i$th observation, and $\epsilon_i$ is the residual error at the $i$th observation.
+
+Similar to the loess equation, y represents the percentage coverage of a particular service level while x represents each individual year for a particular country.  The smooth function $f_j(x_{ij})$ represents the relationship between x and y that is not linear, but is instead a more flexible, non-linear function that is estimated by the GAM.
+
+
+3.  Quadratic : These are regressions with a quadratic term added to it. As a good number of countries have a curved trajectory as noted by [@fuller2016tracking], this research will extend the linear regression applied by the JMP by adding a quadratic term $x^2$ to capture this curved shape as shown in the equation below:
+
+$$
+y_i = \beta_0 + \beta_1 x_i + \beta_2 x_i^2 + \epsilon_i,
+$$
+
+where $y_i$ is the coverage/percentage of the population using a particular sanitation service level at the $i$th observation, $x_i$ is the time/individual year at the $i$th observation, $\beta_0$ is the intercept term, $\beta_1$ is the linear coefficient, $\beta_2$ is the quadratic coefficient, and $\epsilon_i$ is the residual error at the $i$th observation.
+
+
+4.  Splines : These are formed by joining two or more linear regression lines. The point where the lines intersect is referred to as a knot. This research will also fit a cubic spline using the below equation
+
+$$y_i = \beta_0 + \beta_1x_i + \beta_2x_i^2 + \sum_{j=1}^{k} \beta_{j+2}(x_i - \xi_j)^3_{+} + \epsilon_i$$
+
+where $y_i$ represents the coverage/percentage of population using a particular sanitation service level at time $x_i$, $\beta_0$ represents the intercept, $\beta_1$ represents the slope, and $\beta_2$ represents the curvature of the spline. The terms $(x_i - \xi_j)^3_{+}$ represent the cubic spline basis functions, which are equal to $(x_i - \xi_j)^3$ if $x_i > \xi_j$ and 0 otherwise. The coefficients $\beta_{j+2}$ represent the additional contribution of each knot to the model, beyond the linear and quadratic terms.
+
+## Use cases
+
+To better illustrate the performance of the four statistical models listed above, this study will take a closer look at four use cases for countries with different trajectories and number of data points:
+1. Sewer connection in rural and urban Afghanistan
+2. Open defecation in rural and urban Tanzania
+3. Improved sanitation in rural and Urban Brazil
+4. Septic tank connection in rural and urban Uganda
+
+## Goodness of fit
+
+After fitting the models, this study will analyse performance using three popular measures: the Akaike information criterion(AIC), the Bayesian information criterion(BIC) and the Root Mean Square Error(RMSE), also employed by [@perez-foguet2017compositional]. The AIC and BIC are information criteria that balance the model's goodness of fit with its complexity. The AIC is given by:
+
+$$\text{AIC} = -2\log(L) + 2k$$
+
+where $L$ is the likelihood of the model and $k$ is the number of model parameters. The BIC is given by:
+
+$$\text{BIC} = -2\log(L) + k\log(n)$$
+
+where $n$ is the number of observations.
+
+The RMSE is a measure of the difference between the predicted values of the model and the observed values. It is given by:
+
+$$\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+
+where $y_i$ is the observed value and $\hat{y}_i$ is the predicted value for the $i$th observation, and $n$ is the number of observations.  This study will thereafter map out a decision tree to select a suitable model depending on individual country trajectories and number of data points.
+
