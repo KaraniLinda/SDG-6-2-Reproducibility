@@ -2,7 +2,7 @@
 title: "Thesis report"
 format: docx
 editor: source
-bibliography: msc-thesis-lkarani.bib
+bibliography: msc references.bib
 csl: apa.csl
 ---
 
@@ -175,7 +175,8 @@ S3 & Improved sanitation facilities connected to septic tanks \\
 S6 & No sanitation facilities (open defecation) \\
 \hline
 \end{quarto-tabular}
-\label{Tabel 1:Primary sanitation indicators}
+\label{table:primary-sanitation-indicators}
+
 
 
 
@@ -187,9 +188,9 @@ This study will begin by reproducing the four sanitation primary indicators for 
 
 The model can be written as:
 
-\begin{equation}
+$$
 y_i = \beta_0 + \beta_1 x_i + \epsilon_i,
-\end{equation}
+$$
 
 where $y_i$ represents the proportion of the population using a particular sanitation service level at time $i$, 
 $x_i$ represents the year , 
@@ -201,9 +202,8 @@ nd $\epsilon_i$ represents the error term at time $i$.
 
 3.  Extension for four years backwards and forwards beyond the years covered by data inputs and extrapolation.
 
-The above steps are effectively demonstrated in "Figure \ref{fig:Figure 1}" below:
+The above steps are effectively demonstrated in "Figure 1 \ref{fig:Figure 1}" below:
 
-```{figure} [htbp]
 \centering
 \includegraphics[width=0.7\textwidth]{linearreg.png}
 \caption{Interpolation, extrapolation and extension of JMP estimates.\protect\footnotemark}
@@ -212,11 +212,12 @@ The above steps are effectively demonstrated in "Figure \ref{fig:Figure 1}" belo
 \footnotetext{Image source: (JMP, 2017).}
 
 
+
 Using R as a scripting language, the raw data will be extracted from each of the national excel country files downloaded from the official WHO/UNICEF JMP website (https://washdata.org/data). R will further be used for data cleaning and transformation. A linear model will then be applied to derive the estimates with the goal to reproduce the statistical methods applied by the WHO/UNICEF JMP using the same rules described above. This approach is further described in detail by [@bartram2014global] and [@fuller2016tracking]
 
-The derived estimates will then be compared to the JMP estimates to and assessed for goodness of fit using the AIC, BIC and RMSE. The proposed methodological approach is shown in "Figure \ref{fig:Figure 2} below:
+The derived estimates will then be compared to the JMP estimates to and assessed for goodness of fit using the AIC, BIC and RMSE. The proposed methodological approach is shown in "Figure 2 \ref{fig:Figure 2} below:
 
-```{figure} [htbp]
+
 \centering
 \includegraphics[width=0.7\textwidth]{Methodology.png}
 \caption{Proposed approach}
@@ -227,7 +228,7 @@ The derived estimates will then be compared to the JMP estimates to and assessed
 
 This study will then fit different non linear models to the data points for each of the 232 countries using the same estimation rules applied to the ordinary least squares regression. These will include:
 
-1.  Local Regression(LOESS) : This is a non parametric smoothing function used to model non linear relationships by making a large number of quadratic or linear regression lines as a window moves along the x-axis. It is an important tool for modeling non linear relationships in the social sciences field [@Jacoby2000]. The exact equation is:
+1.  Local Regression(LOESS) : This is a non parametric smoothing function used to model non linear relationships by making a large number of quadratic or linear regression lines as a window moves along the x-axis. It is an important tool for modeling non linear relationships in the social sciences field [@jacoby2000loess]. The exact equation is:
 
 $$
 y_i = \hat{f}(x_i) + \epsilon_i,
