@@ -2,7 +2,7 @@
 title: "Thesis report"
 format: docx
 editor: source
-bibliography: msc references.bib
+bibliography: msc-thesis-karani.bib
 csl: apa.csl
 ---
 
