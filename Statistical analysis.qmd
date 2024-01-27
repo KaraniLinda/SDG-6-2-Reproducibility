@@ -11,6 +11,7 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(modelr)
+library(Metrics)
 ```
 
 ```{r}
@@ -85,7 +86,7 @@ jmpraw |>
     #summarise(mean(value))
     summarise(mean = mean(value),
               sd = sd(value))
-
+unique(jmpraw$iso3)
 ```
 
 ## Reference papers
@@ -96,24 +97,412 @@ jmpraw |>
 
 ```{r}
 jmpraw %>% 
-    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>% 
+    filter(iso3 == "BRA",residence == "rural", var_long == "Septic") %>% 
     ggplot(aes(x = year, y = value)) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE)
 
 ```
 
+##Sewer connection in Ghana
 ```{r}
-
-uga_rural_improved <- jmpraw %>%  
-    filter(iso3 == "UGA",residence == "rural", var_long == "Improved") %>%  
+#Ghana
+gha_rural_sewer <- jmpraw %>%  
+    filter(iso3 == "THA",residence == "urban", var_long == "Improved" ) %>%  
     group_by(year) %>% 
     summarise(mean_value = mean(value))
 
-uga_rural_improved
+
 
     
 ```
+
+```{r}
+rep <- jmpraw %>% 
+    filter(year %in% c(2000,2005,2010,2015,2017) & var_long %in% c("Improved", "Open defecation", "Sewer", "Septic")) %>% 
+    group_by(year, var_long) %>% 
+     summarise(count = n_distinct(iso3))
+```
+
+
+```{r}
+# Linear regression
+linear_model <- lm(mean_value ~ year, data = gha_rural_sewer)
+linear_residuals <- residuals(linear_model)
+
+# Quadratic regression
+quadratic_model <- lm(mean_value ~ poly(year, 2), data = gha_rural_sewer)
+quadratic_residuals <- residuals(quadratic_model)
+
+# GAM with splines
+gam_model <- gam(mean_value ~ s(year, bs = "cr", k = 4), data = gha_rural_sewer)
+gam_residuals <- residuals(gam_model)
+
+
+# Loess
+loess_model <- loess(mean_value ~ year, data = gha_rural_sewer, span = 0.5, degree = 2)
+loess_residuals <- residuals(loess_model)
+
+
+# Make predictions for each model
+linear_pred <- predict(linear_model, newdata =gha_rural_sewer)
+quadratic_pred <- predict(quadratic_model, newdata = gha_rural_sewer)
+gam_pred <- predict(gam_model, newdata = gha_rural_sewer)
+loess_pred <- predict(loess_model, newdata = gha_rural_sewer)
+
+# Combine predictions into a data frame
+plot_data <- data.frame(
+  year = rep(gha_rural_sewer$year, 4),
+  mean_value = c(linear_pred, quadratic_pred, gam_pred, loess_pred),
+  model = rep(c("Linear Regression", "Quadratic Regression", "GAM", "Loess"), each = 10)
+)
+
+# Plot with legend
+ggplot(gha_rural_sewer, aes(x = year, y = mean_value)) +
+  geom_point() +
+  geom_line(data = plot_data, aes(color = model), size = 1) +
+  labs(title = "Improved sanitation rural - Bolivia",
+       x = "Year",
+       y = "Total population percentage(%)") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_x_continuous(breaks = seq(2000, 2017, by = 4), labels = seq(2000, 2017, by = 4))
+
+summary(gam_model)
+
+
+```
+
+```{r}
+options(scipen = 999)
+# Combine residuals into a wide-format dataframe
+residuals_data <- data.frame(
+  year = gha_rural_sewer$year,
+  linear_residuals = linear_residuals,
+  quadratic_residuals = quadratic_residuals,
+  gam_residuals = gam_residuals,
+  loess_residuals = loess_residuals
+)
+
+# Display the resulting dataframe
+print(residuals_data)
+
+resid <- residuals_data %>% 
+    summarise(avg_linear = mean(abs(linear_residuals)),
+              avg_quad= mean(abs(quadratic_residuals)),
+              avg_gam = mean(abs(gam_residuals)),
+              avg_loess = mean(abs(loess_residuals)))
+
+```
+
+```{r}
+# Assuming gha_rural_sewer is your dataset
+
+# Linear regression
+linear_model <- lm(mean_value ~ year, data = gha_rural_sewer)
+linear_pred <- predict(linear_model, newdata = gha_rural_sewer, interval = "confidence", level = 0.96)
+linear_intervals <- data.frame(linear_pred)
+
+# Quadratic regression
+quadratic_model <- lm(mean_value ~ poly(year, 2), data = gha_rural_sewer)
+quadratic_pred <- predict(quadratic_model, newdata = gha_rural_sewer, interval = "confidence", level = 0.96)
+quadratic_intervals <- data.frame(quadratic_pred)
+
+# GAM with splines
+gam_model <- gam(mean_value ~ s(year, bs = "cr", k = 4), data = gha_rural_sewer)
+gam_pred <- predict(gam_model, newdata = gha_rural_sewer, type = "response", se.fit = TRUE)
+gam_intervals <- data.frame(
+  fit = gam_pred$fit,
+  lower = gam_pred$fit - 1.96 * gam_pred$se.fit,
+  upper = gam_pred$fit + 1.96 * gam_pred$se.fit
+)
+
+# Loess
+loess_model <- loess(mean_value ~ year, data = gha_rural_sewer, span = 0.5, degree = 2)
+loess_pred <- predict(loess_model, newdata = gha_rural_sewer, se = TRUE)
+loess_intervals <- data.frame(
+  fit = loess_pred$fit,
+  lower = loess_pred$fit - 1.96 * loess_pred$se,
+  upper = loess_pred$fit + 1.96 * loess_pred$se
+)
+
+# Combine intervals into a wide-format dataframe
+intervals_data <- data.frame(
+  year = gha_rural_sewer$year,
+  linear_fit = linear_intervals$fit,
+  linear_lower = linear_intervals$fit - 1.96 * linear_intervals$se.fit,
+  linear_upper = linear_intervals$fit + 1.96 * linear_intervals$se.fit,
+  quadratic_fit = quadratic_intervals$fit,
+  quadratic_lower = quadratic_intervals$fit - 1.96 * quadratic_intervals$se.fit,
+  quadratic_upper = quadratic_intervals$fit + 1.96 * quadratic_intervals$se.fit,
+  gam_fit = gam_intervals$fit,
+  gam_lower = gam_intervals$lower,
+  gam_upper = gam_intervals$upper,
+  loess_fit = loess_intervals$fit,
+  loess_lower = loess_intervals$lower,
+  loess_upper = loess_intervals$upper
+)
+
+# Display the resulting dataframe
+print(intervals_data)
+
+```
+
+
+```{r}
+
+# Calculate R-squared for each model
+r2_linear <- 1 - sum((gha_rural_sewer$mean_value - as.vector(linear_pred))^2) / sum((gha_rural_sewer$mean_value - mean(gha_rural_sewer$mean_value))^2)
+r2_quadratic <- 1 - sum((gha_rural_sewer$mean_value - as.vector(quadratic_pred))^2) / sum((gha_rural_sewer$mean_value - mean(gha_rural_sewer$mean_value))^2)
+r2_gam <- 1 - sum((gha_rural_sewer$mean_value - as.vector(gam_pred))^2) / sum((gha_rural_sewer$mean_value - mean(gha_rural_sewer$mean_value))^2)
+r2_loess <- 1 - sum((gha_rural_sewer$mean_value - as.vector(loess_pred))^2) / sum((gha_rural_sewer$mean_value - mean(gha_rural_sewer$mean_value))^2)
+
+# Calculate BIC for each model
+n <- nrow(gha_rural_sewer)
+bic_linear <- n * log(sum((gha_rural_sewer$mean_value - as.vector(linear_pred))^2) / n) + 2 * log(n)  # 2 parameters in linear model
+bic_quadratic <- n * log(sum((gha_rural_sewer$mean_value - as.vector(quadratic_pred))^2) / n) + 3 * log(n)  # 3 parameters in quadratic model
+bic_gam <- gam_model$sp - 2 * logLik(gam_model)  # Extract BIC from gam object
+bic_loess <- n * log(sum((gha_rural_sewer$mean_value - as.vector(loess_pred))^2) / n) + 2 * log(n)  # 2 parameters in loess model
+
+# Calculate AIC for each model
+aic_linear <- n * log(sum((gha_rural_sewer$mean_value - as.vector(linear_pred))^2) / n) + 2  # 2 parameters in linear model
+aic_quadratic <- n * log(sum((gha_rural_sewer$mean_value - as.vector(quadratic_pred))^2) / n) + 3  # 3 parameters in quadratic model
+aic_gam <- gam_model$sp - 2 * logLik(gam_model)  # Extract AIC from gam object
+aic_loess <- n * log(sum((gha_rural_sewer$mean_value - as.vector(loess_pred))^2) / n) + 2  # 2 parameters in loess model
+
+
+# Calculate RMSE for each model
+rmse_linear <- sqrt(mean((gha_rural_sewer$mean_value - as.vector(linear_pred))^2))
+rmse_quadratic <- sqrt(mean((gha_rural_sewer$mean_value - as.vector(quadratic_pred))^2))
+rmse_gam <- sqrt(mean((gha_rural_sewer$mean_value - as.vector(gam_pred))^2))
+rmse_loess <- sqrt(mean((gha_rural_sewer$mean_value - as.vector(loess_pred))^2))
+
+# Print or store the results
+results <- data.frame(
+  Model = c("Linear Regression", "Quadratic Regression", "GAM", "Loess"),
+  R2 = c(r2_linear, r2_quadratic, r2_gam, r2_loess),
+  BIC = c(bic_linear, bic_quadratic, bic_gam, bic_loess),
+  AIC = c(aic_linear, aic_quadratic, aic_gam, aic_loess),
+  RMSE = c(rmse_linear, rmse_quadratic, rmse_gam, rmse_loess)
+)
+
+print(results)
+
+
+```
+
+
+## Septic connection Brazil
+```{r}
+bra_rural_septic <- jmpraw %>%  
+    filter(iso3 == "BRA",residence == "rural", var_long == "Septic") %>%  
+    group_by(year) %>% 
+    summarise(mean_value = mean(value))
+```
+
+
+```{r}
+# Linear regression
+linear_model <- lm(mean_value ~ year, data = bra_rural_septic)
+
+# Quadratic regression
+quadratic_model <- lm(mean_value ~ poly(year, 2), data = bra_rural_septic)
+
+# GAM with splines
+gam_model <- gam(mean_value ~ s(year, bs = "cr", k = 4), data = bra_rural_septic)
+
+
+# Loess
+loess_model <- loess(mean_value ~ year, data = bra_rural_septic, span = 0.5, degree = 2)
+
+# Create a sequence of years for prediction
+new_data <- data.frame(year = seq(2000,2020,1))
+
+# Make predictions for each model
+linear_pred <- predict(linear_model, newdata = new_data)
+quadratic_pred <- predict(quadratic_model, newdata = new_data)
+gam_pred <- predict(gam_model, newdata = new_data)
+loess_pred <- predict(loess_model, newdata = new_data)
+
+# Combine predictions into a data frame
+plot_data <- data.frame(
+  year = rep(new_data$year, 4),
+  mean_value = c(linear_pred, quadratic_pred, gam_pred, loess_pred),
+  model = rep(c("Linear Regression", "Quadratic Regression", "GAM", "Loess"), each = 21)
+)
+
+# Plot with legend
+ggplot(bra_rural_septic, aes(x = year, y = mean_value)) +
+  geom_point() +
+  geom_line(data = plot_data, aes(color = model), size = 1) +
+  labs(title = "Septic connection rural - Brazil",
+       x = "Year",
+       y = "Total population percentage(%)") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_x_continuous(breaks = seq(2000, 2017, by = 4), labels = seq(2000, 2017, by = 4))
+
+summary(gam_model)
+ggsave("sewer_bra_rural.png",width = 15, height = 20, units = "cm")
+```
+
+```{r}
+options(scipen = 999)
+pred_bra_rural <- as.data.frame(cbind(linear_pred, loess_pred, gam_pred, quadratic_pred))
+
+pred_bra_rural <- pred_bra_rural %>% 
+    mutate(loess_dev = loess_pred - linear_pred,
+           gam_dev = gam_pred - linear_pred ,
+           quadratic_dev = quadratic_pred - linear_pred)
+
+avg <- pred_bra_rural %>% 
+    summarise(loess_avg = mean(loess_dev, na.rm = TRUE),
+              quadratic_avg = mean(quadratic_dev),
+              gam_avg = mean(gam_dev))
+```
+
+
+
+##Open defecation-India
+```{r}
+ind_urban_opend <- jmpraw %>%  
+    filter(iso3 == "IND",residence == "urban", var_long == "Open defecation") %>%  
+    group_by(year) %>% 
+    summarise(mean_value = mean(value))
+
+```
+
+
+
+```{r}
+# Linear regression
+linear_model <- lm(mean_value ~ year, data = ind_urban_opend)
+
+# Quadratic regression
+quadratic_model <- lm(mean_value ~ poly(year, 2), data = ind_urban_opend)
+
+# GAM with splines
+gam_model <- gam(mean_value ~ s(year, bs = "cr", k = 4), data = ind_urban_opend)
+
+
+# Loess
+loess_model <- loess(mean_value ~ year, data = ind_urban_opend, span = 0.5, degree = 2)
+
+# Create a sequence of years for prediction
+new_data <- data.frame(year = seq(2000,2020,1))
+
+# Make predictions for each model
+linear_pred <- predict(linear_model, newdata = new_data)
+quadratic_pred <- predict(quadratic_model, newdata = new_data)
+gam_pred <- predict(gam_model, newdata = new_data)
+loess_pred <- predict(loess_model, newdata = new_data)
+
+# Combine predictions into a data frame
+plot_data <- data.frame(
+  year = rep(new_data$year, 4),
+  mean_value = c(linear_pred, quadratic_pred, gam_pred, loess_pred),
+  model = rep(c("Linear Regression", "Quadratic Regression", "GAM", "Loess"), each = 21)
+)
+
+# Plot with legend
+ggplot(ind_urban_opend, aes(x = year, y = mean_value)) +
+  geom_point() +
+  geom_line(data = plot_data, aes(color = model), size = 1) +
+  labs(title = "Open defecation urban - India",
+       x = "Year",
+       y = "Total population percentage(%)") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_x_continuous(breaks = seq(2000, 2017, by = 4), labels = seq(2000, 2017, by = 4))
+
+ggsave("opend_ind_urban.png",width = 15, height = 20, units = "cm")
+summary(loess_model)
+```
+
+```{r}
+options(scipen = 999)
+pred_ind_urban <- as.data.frame(cbind(linear_pred, loess_pred, gam_pred, quadratic_pred))
+
+pred_ind_urban <- pred_ind_urban %>% 
+    mutate(loess_dev = loess_pred - linear_pred,
+           gam_dev = gam_pred - linear_pred ,
+           quadratic_dev = quadratic_pred - linear_pred)
+
+avg <- pred_ind_urban %>% 
+    summarise(loess_avg = mean(loess_dev, na.rm = TRUE),
+              quadratic_avg = mean(quadratic_dev),
+              gam_avg = mean(gam_dev))
+```
+
+
+
+##Improved sanitation - Ethiopia
+```{r}
+library(ggplot2)
+library(mgcv)
+
+
+
+# Linear regression
+linear_model <- lm(mean_value ~ year, data = eth_rural_improved)
+
+# Quadratic regression
+quadratic_model <- lm(mean_value ~ poly(year, 2), data = eth_rural_improved)
+
+# GAM with splines
+gam_model <- gam(mean_value ~ s(year, bs = "cr", k = 4), data = eth_rural_improved)
+
+
+# Loess
+loess_model <- loess(mean_value ~ year, data = eth_rural_improved, span = 0.5, degree = 2)
+
+# Create a sequence of years for prediction
+new_data <- data.frame(year = seq(2000,2020,1))
+
+# Make predictions for each model
+linear_pred <- predict(linear_model, newdata = new_data)
+quadratic_pred <- predict(quadratic_model, newdata = new_data)
+gam_pred <- predict(gam_model, newdata = new_data)
+loess_pred <- predict(loess_model, newdata = new_data)
+
+# Combine predictions into a data frame
+plot_data <- data.frame(
+  year = rep(new_data$year, 4),
+  mean_value = c(linear_pred, quadratic_pred, gam_pred, loess_pred),
+  model = rep(c("Linear Regression", "Quadratic Regression", "GAM", "Loess"), each = 21)
+)
+
+# Plot with legend
+ggplot(eth_rural_improved, aes(x = year, y = mean_value)) +
+  geom_point() +
+  geom_line(data = plot_data, aes(color = model), size = 1) +
+  labs(title = "Improved sanitation rural - Ethiopia",
+       x = "Year",
+       y = "Total population percentage(%)") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_x_continuous(breaks = seq(2000, 2017, by = 4), labels = seq(2000, 2017, by = 4))
+
+ggsave("impr_eth_urban.png",width = 15, height = 20, units = "cm")
+
+```
+
+
+```{r}
+options(scipen = 999)
+pred_eth_rural <- as.data.frame(cbind(linear_pred, loess_pred, gam_pred, quadratic_pred))
+
+pred_eth_rural <- pred_eth_rural %>% 
+    mutate(loess_dev = linear_pred-loess_pred,
+           gam_dev = linear_pred - gam_pred,
+           quadratic_dev = linear_pred - quadratic_pred)
+
+avg <- pred_eth_rural %>% 
+    summarise(loess_avg = mean(loess_dev, na.rm = TRUE),
+              quadratic_avg = mean(quadratic_dev),
+              gam_avg = mean(gam_dev))
+```
+
 
 ```{r}
 uga_rural_improved %>% 
@@ -126,7 +515,7 @@ By filtering the data for Uganda and improved sanitation, we can see from the gr
 
 ```{r}
 
-uga_rural_improved_lm_fit <- lm(mean_value ~ year, data = uga_rural_improved)
+    uga_rural_improved_lm_fit <- lm(mean_value ~ year, data = uga_rural_improved)
 
 summary(uga_rural_improved_lm_fit)
     
