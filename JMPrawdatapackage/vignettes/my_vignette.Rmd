@@ -1,0 +1,40 @@
+---
+title: "JMP raw sanitation data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette provides an explanation of the variables in the jmp raw data sanitation dataset.
+
+## Variable descriptions
+
+- source : Represents the code associated with the source of the data i.e census, report or survey.
+- type : Type of the data i.e census, survey or report
+- year : Represents the year when the estimate was recorded
+- var_short : Short variable sanitation description
+- value : Represents the percentage pf the population using a particular sanitation service
+- iso3 : ISO3 country code
+- var_long : Represents the sanitation service
+- residence : Rural or urban residence
+- san_service_chain : Represents the service ladder associated with the sanitation indicator
+
+## Installation
+
+Use the below code to install the package
+```{r setup}
+remotes::install_github("KaraniLinda/SDG-6-2-Reproducibility/JMPrawdatapackage")
+
+library(JMPrawdatapackage)
+```
